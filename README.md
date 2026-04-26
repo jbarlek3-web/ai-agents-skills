@@ -12,6 +12,26 @@
 
 ---
 
+## 🚀 NEW: Yuv-Viral-Video Skill
+
+**Just added!** The complete signature-style video editor that turns raw selfie or screen-share footage into a viral short-form video the way YUV.AI ships them — Apple-style liquid-glass cards with real backdrop blur, dark-mode polish, MrBeast-paced cuts, video-title karaoke captions, content-relevant motion graphics, no fake content, **never covering the speaker's face**, always rendering BOTH 9:16 and 16:9, always saving with `_V<N>` backup suffix. Hebrew is rendered in Rubik Black (with proper RTL via `python-bidi`), English in Anton uppercase. Encodes every painful lesson from real edits as a hard rule the next render automatically respects.
+
+🔗 **[View the Yuv-Viral-Video Skill →](skills/yuv-viral-video/SKILL.md)**
+
+**What it does:**
+- Apple-style frosted glass cards: rounded corners + `gblur sigma=24` backdrop + `alphamerge` masks so the blur stops cleanly at the rounded shape (no rectangular leak past the corners)
+- Auto-routes the layout per archetype: screen-share footage shows the screen content (top 2/3) with rounded speaker PIP at bottom 1/3; full-frame selfie shows the speaker prominently with cards in the safe top-banner zone (face never covered)
+- Per-segment dynamic motion (push-in / pull-out / snap-in / dolly / shake) baked into the extract chain with subtle MrBeast-style amounts
+- Real animated diagrams: bar chart (uses actual category names from transcript, never fake numbers), flow diagram with glowing brand-color nodes connected by animated dashed arrows
+- Word-by-word video-title karaoke: scale-pop entrance with `\fscx150\fscy150\t(0,140,\fscx100\fscy100)`, accent words get yellow + rotation jitter, English brand tokens auto-route to Anton uppercase
+- Bottom key-moment glass strips that summarise the current beat in 1-4 words (Hebrew right + English left + yellow accent stripe)
+- ElevenLabs SFX kit (impact, bass_drop, whoosh, riser, ding, glitch, typing) mixed at the right output times via `adelay`
+- Two-pass loudnorm to -14 LUFS / -1 dBTP / LRA 11 (TikTok / Reels / YouTube standard)
+- **Versioning**: every render writes a NEW `final_*_V<N>.mp4` — previous versions are never overwritten
+- **Truth contract**: every word on every card is auditable against the actual transcript. No "$$$" placeholders, no "100% הבנה" if the speaker didn't say it, no "לינק בביו" if no link was promised
+
+---
+
 ## 🆕 NEW: Meta Ads Skill
 
 **Just added!** A battle-tested skill for pulling, analyzing, and managing Meta ad performance (Facebook, Instagram, Messenger, Click-to-WhatsApp, Threads) via the Marketing API. No guesswork, no generic dashboards — the scripts auto-discover your accounts, decode status codes and currency units, handle rate limits and async insights jobs, and guard write actions behind explicit confirmations.
