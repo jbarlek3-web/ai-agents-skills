@@ -12,6 +12,81 @@ The signature YUV.AI viral-short pipeline. **Two skills working together**:
 
 **You MUST use both.** Do not invent your own PIL-based cards, do not pre-bake blur into PNGs, do not write your own ffmpeg compositor. The hyperframes skill exists specifically to do the visual layer at Hollywood quality.
 
+## Companion skills (read these BEFORE you start)
+
+Both companion skills are installed locally and auto-discovered by Claude Code at session start. **You MUST load and apply their guidelines** — this skill is the *editorial* layer on top of them, not a replacement.
+
+| Skill | Path | Owns |
+|---|---|---|
+| `video-use` | `~/.claude/skills/video-use/SKILL.md` (symlink → `~/Developer/video-use`) | Transcription (ElevenLabs Scribe), word-snapped cuts, color grade, ffmpeg-correctness (per-segment extract → `-c copy` concat, 30 ms audio fades, `setpts=PTS-STARTPTS+T/TB` overlays, output-timeline SRT offsets, transcript caching). Read its **"Hard Rules (production correctness — non-negotiable)"** section before authoring `edl.json`. Helpers live at `~/Developer/video-use/helpers/` and are invoked as `python helpers/<name>.py`. |
+| `hyperframes` | `~/.claude/skills/hyperframes/SKILL.md` | HTML-as-source-of-truth video compositions, `data-*` timing attributes, CSS-driven appearance, frame-accurate library-clock animation (GSAP, Lottie, Motion One). Read its companion docs `house-style.md`, `data-in-motion.md`, `patterns.md`, `visual-styles.md` before writing the composition `index.html`. |
+| `hyperframes-cli` | `~/.claude/skills/hyperframes-cli/SKILL.md` | The `hyperframes init / lint / preview / render / transcribe / tts` commands. CLI is also installed globally (`hyperframes` on `$PATH`) so `npx` is optional. |
+| `gsap` | `~/.claude/skills/gsap/SKILL.md` | The full GSAP animation vocabulary. The `back.out(1.7)` springy easing rule in this document is one applied pattern; reach for gsap's full toolkit when the material calls for it. |
+| `website-to-hyperframes` | `~/.claude/skills/website-to-hyperframes/SKILL.md` | One-shot: scrape a URL → hyperframes composition. Useful when the source has on-screen UI worth re-staging. |
+
+### Precedence (when this document conflicts with a companion skill)
+
+- **Production correctness (cuts, encoding, ffmpeg flags, ffmpeg filter ordering, transcript handling) → companion skill wins.** If `video-use` says "subtitles applied LAST in the filter chain after every overlay" and this document is silent or different, do what `video-use` says. Same for hyperframes API conventions, `data-*` attributes, frame-adapter patterns.
+- **Editorial style (fonts, glass cards, "never cover the face", `_V<N>` versioning, archetype layout decisions, MrBeast pacing, no-fabricated-content rule) → this document wins.** Companion skills are deliberately style-agnostic; the YUV.AI house style lives here.
+- **Strategy confirmation:** `video-use` Hard Rule 11 says "confirm the plan in plain English before executing." For viral shorts in YUV.AI style this is **deliberately suspended** — the style is fully captured in this document's Hard Rules, so the agent should execute the first pass and iterate from feedback rather than blocking on creative-direction questions. (For non-viral video-use sessions, follow the companion skill's rule.)
+- **Cut-edge padding:** `video-use` allows 30–200 ms; this document picks 50 ms head / 80 ms tail as the YUV.AI default within that range. Both are correct; the narrower value is a style choice.
+
+### Shared configuration
+
+Both skills read `ELEVENLABS_API_KEY` from `~/Developer/video-use/.env`. Set it once and both skills work. Do not duplicate the key in this skill's directory.
+
+## Style preferences (mandatory defaults — inherited from `yuv-frontend-design`)
+
+This skill is the **video instantiation** of Yuval Avidani's brand system. Whenever a brand or palette is not explicitly specified by the source content, these defaults apply. They override any companion-skill defaults that conflict.
+
+### Typography
+
+| Role | English | Hebrew | Rule |
+|---|---|---|---|
+| Display / cards / karaoke captions | **Anton** (uppercase, weight 400 + tight tracking `-0.02em` to `-0.04em`) | **Rubik Black** (weight 900) | Always uppercase for English, never title case. Always weight-900 for Hebrew display text. |
+| Body / glass-card body copy / chip text | **Inter** (400 / 500 / 600 / 700) | **Assistant** (400 / 500 / 600 / 700) | Use only when the card has secondary body copy beneath the display title. Line-height 1.4 inside cards. |
+| Numbers / counters / stats | **Anton** | **Rubik Black** | Treat numbers as display text, never body. |
+| Code / mono (terminal cards, paths) | **JetBrains Mono** | — | For typewriter-style code reveals. |
+
+**Hebrew direction:** `dir="rtl"` on every Hebrew caption container. Use `python-bidi`'s `get_display()` only in PIL fallback paths; CSS handles RTL natively. Logical CSS properties (`margin-inline-*`, `padding-inline-*`) preferred over physical (`margin-left`).
+
+**Banned:** serif fonts as defaults, system-ui stack, Anton on Hebrew text (renders as hollow X — Anton is Latin-only).
+
+### Color palette
+
+The canonical YUV.AI palette and its video-tuned counterparts:
+
+| Role | Web canonical | Video-rendered (use inside MP4) | Why the deviation |
+|---|---|---|---|
+| Off-white / paper | `#FAFAF7` | `#F5F0E1` (warmer) | Reads warmer over dark stages with text-stroke; reduces the "blue-white glare" effect on H264. |
+| Yellow / accent | `#E5FF00` | `#FFE61E` | Slightly more saturated; punches through black text-stroke at small sizes. |
+| Pink / brand thread | `#FF1464` | `#FF1464` | Same. Use as glass-card border accents, key-moment strip stroke, brand thread. |
+| Black / stage | `#0A0A0A` | `#0c0e16` (warm near-black) | Avoids pure black banding under H264. |
+| Charcoal / text on light | `#1A1A1A` | — | UI overlays only (preview pages, never inside the rendered MP4). |
+| Bone / cream | `#F5EEE4` | — | Web pages, never inside the MP4. |
+
+**Banned in any rendered output:**
+
+- Pure `#FFFFFF` — always replace with the warmer off-white.
+- Blue accents (navy, slate, indigo, cool gray) unless the source brand requires them.
+- Default Tailwind palette names (`slate-*`, `zinc-*`, `gray-*`, `emerald-*`, `cyan-*`, `indigo-*`, `violet-*`, `rose-*`).
+- Multicolor icon sets — Phosphor or Lucide single-stroke only.
+
+### Layout & motion defaults
+
+- **Border radius:** glass cards use `40–56px` (signature soft-rounded). Pill CTAs `999px`. Never the 8/12px corporate-rounded middle ground.
+- **Shadows:** warm-toned (pink/orange undertone) — `0 20px 60px rgba(255, 20, 100, 0.12)` on glass cards, never the default blue-black `rgba(0,0,0,.1)`.
+- **Whitespace:** generous. Cards never fill more than 60% of the frame's free zone.
+- **Asymmetry over grid-perfect.** Offset cards. Overlap. One element breaking the grid.
+- **Grain:** 1–2% noise on any preview / catalog page (not inside the rendered MP4 — would compress to mush).
+- **Animation library:** GSAP (always). `back.out(1.7)` for card entrances, `power3.out` for SplitText reveals, `expo.out` for slam beats, `sine.inOut` for idle floats.
+
+### Inheritance rule
+
+If you are building any auxiliary surface (a preview page, a catalog, a dashboard, a render-status UI), apply the full `yuv-frontend-design` skill defaults — Inter body, off-white page, paper grain, warm shadows, pink CTAs.
+
+If you are rendering the MP4 itself, apply the video-tuned values in the table above. Same brand, two delivery surfaces.
+
 ## When to consult this skill
 
 Any time the user drops a video file and asks for an edit. Even a one-line ask like *"take this and edit it: <path>"* should trigger the full flow below. Don't ask for creative direction up front — the user's style is captured in the **Hard Rules** below; just execute and iterate from feedback.
