@@ -115,10 +115,24 @@ The skill will respect that and skip the YUV.AI defaults.
 
 ## What's in the skill
 
-- **`SKILL.md`** — the full design system encoded as agent-readable rules. Typography matrix, palette table, banned list, layout defaults, animation library preferences, RTL setup, Hyperframes patterns, two starter snippets (English hero + Hebrew RTL hero), one-line self-check before shipping.
+- **`SKILL.md`** — the full design system encoded as agent-readable rules. Typography matrix, palette table, banned list, layout defaults, animation library preferences, RTL setup, Hyperframes patterns, two starter snippets (English hero + Hebrew RTL hero), one-line self-check before shipping. Plus 12 **battle-tested rules** distilled from production iterations.
+
+- **`patterns.md`** — copy-paste code templates for production-tested components, extracted from real sites built with this skill (most recently [effects.yuv.ai](https://effects.yuv.ai)). Includes:
+  1. Bilingual toggle (EN/HE with flag emojis)
+  2. Mobile hamburger nav (≤ 880px collapse)
+  3. Effect-ID copy chip
+  4. Hyperframes hero reel (real `data-*` attributes)
+  5. IntersectionObserver demo pause
+  6. Course CTA template (practical.yuv.ai, verified content)
+  7. Liquid glass card with 3D tilt-pop
+  8. Connect / social grid (with verified handles + URLs)
+  Plus a pre-ship checklist of 12 must-pass items.
+
+- **`lessons-learned.md`** — 15 specific anti-patterns from real sessions, each paired with the corrective pattern. Read this **before** starting any frontend output to skip the iteration cost. Covers: side-by-side bilingual, missing mobile nav, stacked headlines, untranslated `document.title`, generic install commands, WebFetch on SPAs, invented CTA content, and more.
+
 - **`README.md`** — this file. Public-facing intro and install instructions.
 
-That's it. No scripts, no dependencies — pure documentation that the agent reads once and applies.
+No scripts, no build dependencies — pure documentation that the agent reads once and applies. Together, the four files encode the full muscle memory of building a YUV.AI-grade frontend on the first pass.
 
 ---
 

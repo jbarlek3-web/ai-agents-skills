@@ -87,6 +87,49 @@ If you are building any auxiliary surface (a preview page, a catalog, a dashboar
 
 If you are rendering the MP4 itself, apply the video-tuned values in the table above. Same brand, two delivery surfaces.
 
+## The live effects catalog (use this as the menu)
+
+Yuval maintains a public, live, scrollable visual catalog of every effect, transition, marker, card, theme, and SFX this skill can apply to a video:
+
+**👉 https://effects.yuv.ai**
+
+When commissioning an edit, Yuval (or anyone he sends the catalog to) clicks any effect's chip — the chip copies a stable identifier like `captions.karaoke.scale-pop` to the clipboard. He pastes those IDs into the prompt:
+
+> *"edit this with `style.swiss-pulse`, captions `karaoke.scale-pop`, `marker.circle` on stats, transition `blur-crossfade`, sfx `whoosh` on every cut, sfx `impact` on hero word."*
+
+**You must respect every effect ID** the user pastes. The catalog page is the single source of truth — every ID maps to a documented effect with verified behaviour. If the user names an ID you don't recognize, fetch the catalog (https://effects.yuv.ai) and find its definition rather than improvising.
+
+The catalog also contains a **prompt library** (effects.yuv.ai #prompts) with 8 production-ready full-edit prompts (product launch / explainer / live-code / flow walkthrough / hot-take / tutorial / founder pitch / Hebrew talking-head). When the user references "the prompt for X scenario," route there.
+
+## Bilingual rendering — Hebrew + English in the same video
+
+Many edits will mix Hebrew narration with English brand tokens (Claude, GitHub, hyperframes, etc.). The skill must:
+
+1. **Per-glyph font routing** — Anton handles Latin, Rubik Black handles Hebrew. The single `font-family: 'Anton', 'Rubik', sans-serif` declaration on every text container does this automatically. Never apply Anton to a Hebrew character (it renders as a hollow X — Anton is Latin-only).
+
+2. **RTL containers** — every Hebrew caption line gets `dir="rtl"` on its container. English brand tokens stay LTR within the same line via the browser's bidirectional algorithm — no manual reordering needed.
+
+3. **Brand-name spelling in Hebrew** — Yuval's preferred Hebrew transliterations:
+   - "Claude" → **"קלוד"** (not "קלאוד")
+   - "Hyperframes" → keep English ("Hyperframes")
+   - "GitHub" → keep English ("GitHub")
+   - When Scribe transcribes a brand name with the wrong Hebrew spelling, fix it in the post-transcription pass before generating the karaoke layer.
+
+4. **Companion catalog has bilingual EN/HE everywhere** — the live catalog flips entire UI to Hebrew on toggle (see effects.yuv.ai). The same `data-lang` toggle pattern applies to any auxiliary surface this skill produces (preview pages, render-status UIs, etc.).
+
+## Lessons baked from production iterations
+
+The following were learned across real sessions and now live in `~/.claude/skills/yuv-design/lessons-learned.md`. Read that file before building any auxiliary frontend (preview page, render dashboard, catalog). The video pipeline itself is governed by the Hard Rules below — but any HTML/CSS surface this skill produces must respect:
+
+- **Bilingual = toggle, not side-by-side** (lesson #1 in `lessons-learned.md`)
+- **Mobile = hamburger nav at ≤880px** (lesson #2)
+- **One display headline per section** (lesson #3)
+- **`document.title` is part of language toggle** (lesson #5)
+- **IntersectionObserver for any catalog with >8 demos** (lesson #9)
+- **Build comprehensive on first pass — don't iterate on scope** (lesson #10)
+- **`Claude-in-Chrome` for SPAs, `WebFetch` only for static HTML** (lessons #7, #15)
+- **Verify content from real source pages, never invent** (lesson #8)
+
 ## When to consult this skill
 
 Any time the user drops a video file and asks for an edit. Even a one-line ask like *"take this and edit it: <path>"* should trigger the full flow below. Don't ask for creative direction up front — the user's style is captured in the **Hard Rules** below; just execute and iterate from feedback.

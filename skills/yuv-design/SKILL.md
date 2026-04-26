@@ -11,6 +11,95 @@ This skill is the **frontend / web** counterpart to `yuv-viral-video` (which car
 
 ---
 
+## Battle-tested rules (lessons from production — do not relearn)
+
+These are not opinions. Each one cost an iteration in a real session and is now a hard rule. **Read all 12 before starting any frontend output.**
+
+### 1. Bilingual = toggle, NEVER side-by-side
+If the project is bilingual (EN + HE / EN + AR / EN + FA), build a **language toggle** (button in nav, default EN, switch to HE shows Hebrew content). Do **not** show both languages simultaneously stacked or columned. Side-by-side bilingual UI causes:
+- Massive headlines collide visually (Anton 8vw + Rubik 5vw = visual overlap)
+- Mobile breaks because two columns can't both fit
+- Users complain "the fonts override each other" — and they're right
+
+The toggle pattern: `data-lang="en"` and `data-lang="he"` attributes on every translatable element, plus a universal CSS rule:
+```css
+html:not([lang="he"]) [data-lang="he"] { display: none !important; }
+html[lang="he"] [data-lang="en"] { display: none !important; }
+```
+Plus a JS handler that sets `html[lang]`, swaps `document.title`, persists to `localStorage`, and updates active button. **Full code template in `patterns.md` → "Bilingual toggle".**
+
+### 2. Mobile = hamburger, ALWAYS, at ≤ 880px with > 6 nav items
+If the nav has more than 6 links, build a hamburger menu for `max-width: 880px`. Don't let the nav wrap onto 5 lines and eat the viewport. This is not optional. Default desktop nav + collapsible mobile menu is the spec. **Full code template in `patterns.md` → "Mobile hamburger nav".**
+
+### 3. One display headline per section, never two stacked
+Anton at any size > 50vw / 6vw is HEAVY by design (font-weight 400 is its only weight, but it's a condensed display face). Stacking two display headlines (e.g., EN h1 + HE h1) creates visual overlap because line-heights below 1.0 cause descenders to invade the next line's ascenders. **Solution: toggle (rule 1), or one headline + one secondary subhead at ≤ 50% of the headline size.**
+
+### 4. Never assign HTML strings as element content with anything that isn't 100% literal author-controlled
+- Use `el.textContent = value` for plain text
+- Use `createElement` + `appendChild` for structured content
+- Reserve assigning HTML strings as element content for compile-time constants only (string literals you wrote)
+- Assigning a variable as HTML content will be blocked by security hooks even when "safe" — and if the variable ever takes user input, it's an XSS hole. Just don't.
+
+### 5. `document.title` is part of language toggle
+Don't just swap visible content — also call `document.title = TITLES[lang]`. Otherwise the browser tab title stays English forever, which screams "half-built bilingual" to native speakers.
+
+### 6. Install command is per-skill, never per-repo
+If the skills repo has 5 skills and the user wants 1, the install command must reference that 1 skill — `git clone --depth 1 --filter=blob:none --sparse <repo> /tmp/x && cd /tmp/x && git sparse-checkout set skills/<this-skill> && cp -R skills/<this-skill> ~/.claude/skills/`. Do **not** use `npx skills add <repo>` as the recommended path for a single skill — it's interactive and forces the user to pick from a list.
+
+### 7. Spec-driven content (zero hallucination)
+When the user says "add a CTA for X" / "embed link to Y", **read the actual page first** with the right tool:
+- WebFetch → HTML-static pages (blogs, docs, GitHub)
+- `curl` → API endpoints, raw HTML inspection
+- **Claude-in-Chrome** → JS-rendered SPAs (Teachable, learn.*, builder.io sites)
+
+Don't guess. Don't paraphrase. Quote. If a field isn't on the page, write "not on page" and ask.
+
+### 8. Mobile-first responsive = baseline check, not a polish stage
+Before declaring any frontend work done, **resize the preview to 375×812 (iPhone size)** and screenshot. If you see:
+- Text overflowing the viewport horizontally
+- A nav wrapping to > 2 lines
+- Headlines that are barely readable
+- A grid that should be 2 columns but is 1 narrow column with overflow
+
+…it's not done. Fix before shipping.
+
+### 9. Always `IntersectionObserver` for any catalog with > 8 GSAP demos
+A page with 10+ GSAP timelines all running simultaneously will cook the user's CPU. Pause demos when their stage is offscreen:
+```js
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    const tl = e.target.__tl;
+    if (!tl) return;
+    if (e.isIntersecting) tl.play();
+    else tl.pause();
+  });
+}, { threshold: 0.15 });
+stages.forEach(s => observer.observe(s));
+```
+Each stage stores its timeline at `stage.__tl = tl`. Standard pattern across the catalog.
+
+### 10. Effect-ID copy chip pattern (catalog/showcase sites)
+For any "browse and pick" interface (effects catalog, design system, component library), every item has a **copyable identifier**:
+- Pink/yellow chip with monospace font
+- Click to copy
+- Toast confirmation
+- Use `e.stopPropagation()` if the chip is inside a clickable card so the parent link doesn't navigate
+- Pattern in `patterns.md` → "Effect ID chip"
+
+### 11. Hero = real Hyperframes-compatible composition
+For any major site (catalog, landing, marketing), the hero section should use real Hyperframes `data-*` attributes (`data-composition-id`, `data-start`, `data-duration`, `data-width="1920"`, `data-height="1080"`) on the stage element. This way the **site itself is a Hyperframes artifact** — the user can run `hyperframes render` on the same code to get an MP4 promo for the site. Two outputs (web + video) from one source. **Pattern in `patterns.md` → "Hyperframes hero reel".**
+
+### 12. SSL cert nudge for GitHub Pages custom domain
+If the GH Pages cert state stays at `none` for > 15 min after DNS propagates correctly:
+```bash
+gh api -X PUT /repos/{owner}/{repo}/pages -f "cname="
+sleep 5
+gh api -X PUT /repos/{owner}/{repo}/pages -f "cname=<custom-domain>"
+```
+This kicks the Let's Encrypt validation flow. Don't wait the rumored 24 hours — toggle and it lands within 15 min.
+
+---
+
 ## When this skill applies
 
 - The user is Yuval Avidani.
