@@ -13,9 +13,11 @@ Install as a Claude Code skill:
 
 ```bash
 # Copy to your project
+mkdir -p .claude/skills
 cp -r skills/x-twitter-scraper .claude/skills/
 
 # Or for GitHub Copilot
+mkdir -p .github/skills
 cp -r skills/x-twitter-scraper .github/skills/
 ```
 
