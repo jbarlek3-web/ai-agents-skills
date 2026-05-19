@@ -312,6 +312,7 @@ Agent Skills work with these AI coding agents:
 | **[analytics-metrics](skills/analytics-metrics/SKILL.md)** | Data visualization and analytics dashboards | `analytics`, `dashboard`, `charts`, `KPI` |
 | **[mermaid-diagrams](skills/mermaid-diagrams/SKILL.md)** | Mermaid diagram syntax for visualizations | `Mermaid`, `flowchart`, `sequence diagram` |
 | **[local-llm-router](skills/local-llm-router/SKILL.md)** | Route queries to local LLMs in air-gapped networks with Serena MCP | `local LLM`, `Ollama`, `LM Studio`, `air-gapped`, `Serena`, `model routing` |
+| **[x-twitter-scraper](skills/x-twitter-scraper/SKILL.md)** | X/Twitter data extraction — tweet search, user lookup, followers, media, monitoring | `Twitter`, `X`, `scraper`, `OSINT`, `tweets`, `followers` |
 
 ---
 
@@ -649,10 +650,12 @@ ai-agents-skills/
 │   │   └── 📄 SKILL.md
 │   ├── 📁 mermaid-diagrams/
 │   │   └── 📄 SKILL.md
-│   └── 📁 local-llm-router/
-│       ├── 📄 SKILL.md
-│       └── 📁 references/
-│           └── 📄 model-matrix.md
+│   ├── 📁 local-llm-router/
+│   │   ├── 📄 SKILL.md
+│   │   └── 📁 references/
+│   │       └── 📄 model-matrix.md
+│   └── 📁 x-twitter-scraper/
+│       └── 📄 SKILL.md
 └── 📁 templates/
     └── 📁 skill-template/
         └── 📄 SKILL.md
