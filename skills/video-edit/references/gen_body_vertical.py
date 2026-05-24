@@ -120,8 +120,8 @@ TEMPLATE = r"""<!doctype html>
 <html lang="he" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=1920, height=1080" />
-    <title>Body Captions — Hebrew</title>
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>Body Captions — Hebrew (Vertical)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -131,9 +131,9 @@ TEMPLATE = r"""<!doctype html>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
     <style>
       *, *::before, *::after { box-sizing: border-box; }
-      html, body { width: 1920px; height: 1080px; margin: 0; overflow: hidden; background: transparent; }
+      html, body { width: 1080px; height: 1920px; margin: 0; overflow: hidden; background: transparent; }
       #caption-body {
-        position: relative; width: 1920px; height: 1080px;
+        position: relative; width: 1080px; height: 1920px;
         overflow: hidden; background: transparent; pointer-events: none;
       }
       #cb-stage { position: absolute; inset: 0; }
@@ -200,8 +200,8 @@ TEMPLATE = r"""<!doctype html>
       data-start="0"
       data-duration="__DURATION__"
       data-fps="30"
-      data-width="1920"
-      data-height="1080"
+      data-width="1080"
+      data-height="1920"
     >
       <div id="cb-stage"></div>
     </div>
