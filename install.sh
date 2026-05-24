@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────
 # YUV.AI Skills · One-shot installer for any machine
-# Sets up the full stack: yuv-viral-video, yuv-design, video-use,
+# Sets up the full stack: yuv-decks, yuv-viral-video, yuv-design, video-use,
 # hyperframes (+ 4 companion skills), Python venvs, hyperframes CLI,
 # system deps (ffmpeg/node/uv), and the shared ElevenLabs API key.
 #
@@ -149,19 +149,20 @@ mkdir -p "$HOME/Developer"
 ok "$HOME/.claude/skills"
 ok "$HOME/Developer"
 
-# ─── 1. yuv-viral-video + yuv-design + video-edit + video-to-landing-page ──
-step "Installing yuv-viral-video, yuv-design, video-edit, video-to-landing-page"
+# ─── 1. yuv-decks + yuv-viral-video + yuv-design + video-edit + video-to-landing-page ──
+step "Installing yuv-decks, yuv-viral-video, yuv-design, video-edit, video-to-landing-page"
 
 CLONE_TMP="$(mktemp -d)/ai-agents-skills"
 git clone --depth 1 --filter=blob:none --sparse \
   https://github.com/hoodini/ai-agents-skills "$CLONE_TMP" >/dev/null 2>&1
 ( cd "$CLONE_TMP" && git sparse-checkout set \
+    skills/yuv-decks \
     skills/yuv-viral-video \
     skills/yuv-design \
     skills/video-edit \
     skills/video-to-landing-page >/dev/null 2>&1 )
 
-for skill in yuv-viral-video yuv-design video-edit video-to-landing-page; do
+for skill in yuv-decks yuv-viral-video yuv-design video-edit video-to-landing-page; do
   if [ -d "$HOME/.claude/skills/$skill" ]; then
     info "$skill already exists — refreshing"
     rm -rf "$HOME/.claude/skills/$skill"
