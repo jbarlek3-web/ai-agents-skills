@@ -667,26 +667,32 @@
       const RECENTS_LIMIT = 18;
 
       // ─── Caption-style catalog ───────────────────────────────────────────
-      // 4 styles render today (full adapters in references/gen_body.py).
-      // 11 more preview here and render-fallback to editorial until adapters land.
-      const PREVIEW_BASE = "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/components/";
+      // 13 pill styles + 2 external (kinetic-slam, parallax-layers) all render natively.
+      // Preview sources:
+      //   - Official HyperFrames catalog (4 of 15): editorial-emphasis, matrix-decode,
+      //     kinetic-slam, parallax-layers — hosted on heygen CDN.
+      //   - Local previews (11 of 15): typewriter, neon-glow, split-reveal, mask-wipe,
+      //     marquee-rail, stamp-impact, liquid-fill, glitch-rgb, soft-fade, bold-underline,
+      //     highlight-marker — extracted from our own demo render, served from ./previews/
+      const CATALOG_PREVIEW_BASE = "https://static.heygen.ai/hyperframes-oss/docs/images/catalog/components/";
+      const LOCAL_PREVIEW_BASE = "previews/";
       const STYLE_LIST = [
         { id: "auto",                label: "Auto (Rotate)",        desc: "Default — alternates Editorial Emphasis and Matrix Decode for variety.", supported: true,  badge: "default", noPreview: true },
-        { id: "editorial-emphasis",  label: "Editorial Emphasis",   desc: "Dual-font dual-weight emphasis on key word. Magazine vibe.",            supported: true,  badge: "ready" },
-        { id: "matrix-decode",       label: "Matrix Decode",        desc: "Scramble decode into final glyphs. Mono green.",                        supported: true,  badge: "ready", previewName: "caption-matrix-decode-v2" },
-        { id: "kinetic-slam",        label: "Kinetic Slam",         desc: "One word at a time, slams in full-screen.",                             supported: true,  badge: "ready" },
-        { id: "parallax-layers",     label: "Parallax Layers",      desc: "Huge red word behind the subject. Cinematic.",                          supported: true,  badge: "ready" },
-        { id: "typewriter",          label: "Typewriter",           desc: "Character-by-character reveal with caret.",                             supported: true,  badge: "ready" },
-        { id: "neon-glow",           label: "Neon Glow",            desc: "Pulsing neon outline with bloom.",                                      supported: true,  badge: "ready" },
-        { id: "split-reveal",        label: "Split Reveal",         desc: "Top/bottom halves slide together.",                                     supported: true,  badge: "ready" },
-        { id: "mask-wipe",           label: "Mask Wipe",            desc: "Diagonal mask reveals text.",                                           supported: true,  badge: "ready" },
-        { id: "marquee-rail",        label: "Marquee Rail",         desc: "Words ride a moving rail across the frame.",                            supported: true,  badge: "ready" },
-        { id: "stamp-impact",        label: "Stamp Impact",         desc: "Rubber-stamp punch with chromatic aberration.",                         supported: true,  badge: "ready" },
-        { id: "liquid-fill",         label: "Liquid Fill",          desc: "Letters fill with liquid gradient bottom-up.",                          supported: true,  badge: "ready" },
-        { id: "glitch-rgb",          label: "Glitch RGB",           desc: "Channel-split glitch on word change.",                                  supported: true,  badge: "ready" },
-        { id: "soft-fade",           label: "Soft Fade",            desc: "Minimal fade in/out. For quiet moments.",                               supported: true,  badge: "ready" },
-        { id: "bold-underline",      label: "Bold Underline",       desc: "Heavy underline grows under each word.",                                supported: true,  badge: "ready" },
-        { id: "highlight-marker",    label: "Highlight Marker",     desc: "Hand-drawn yellow marker swipe.",                                       supported: true,  badge: "ready" },
+        { id: "editorial-emphasis",  label: "Editorial Emphasis",   desc: "Dual-font dual-weight emphasis on key word. Magazine vibe.",            supported: true,  badge: "ready", previewSrc: "catalog" },
+        { id: "matrix-decode",       label: "Matrix Decode",        desc: "Scramble decode into final glyphs. Mono green.",                        supported: true,  badge: "ready", previewSrc: "catalog", previewName: "caption-matrix-decode-v2" },
+        { id: "kinetic-slam",        label: "Kinetic Slam",         desc: "One word at a time, slams in full-screen.",                             supported: true,  badge: "ready", previewSrc: "catalog" },
+        { id: "parallax-layers",     label: "Parallax Layers",      desc: "Huge red word behind the subject. Cinematic.",                          supported: true,  badge: "ready", previewSrc: "catalog" },
+        { id: "typewriter",          label: "Typewriter",           desc: "Character-by-character reveal with caret.",                             supported: true,  badge: "ready", previewSrc: "local" },
+        { id: "neon-glow",           label: "Neon Glow",            desc: "Pulsing neon outline with bloom.",                                      supported: true,  badge: "ready", previewSrc: "local" },
+        { id: "split-reveal",        label: "Split Reveal",         desc: "Top/bottom halves slide together.",                                     supported: true,  badge: "ready", previewSrc: "local" },
+        { id: "mask-wipe",           label: "Mask Wipe",            desc: "Diagonal mask reveals text.",                                           supported: true,  badge: "ready", previewSrc: "local" },
+        { id: "marquee-rail",        label: "Marquee Rail",         desc: "Words ride a moving rail across the frame.",                            supported: true,  badge: "ready", previewSrc: "local" },
+        { id: "stamp-impact",        label: "Stamp Impact",         desc: "Rubber-stamp punch with chromatic aberration.",                         supported: true,  badge: "ready", previewSrc: "local" },
+        { id: "liquid-fill",         label: "Liquid Fill",          desc: "Letters fill with liquid gradient bottom-up.",                          supported: true,  badge: "ready", previewSrc: "local" },
+        { id: "glitch-rgb",          label: "Glitch RGB",           desc: "Channel-split glitch on word change.",                                  supported: true,  badge: "ready", previewSrc: "local" },
+        { id: "soft-fade",           label: "Soft Fade",            desc: "Minimal fade in/out. For quiet moments.",                               supported: true,  badge: "ready", previewSrc: "local" },
+        { id: "bold-underline",      label: "Bold Underline",       desc: "Heavy underline grows under each word.",                                supported: true,  badge: "ready", previewSrc: "local" },
+        { id: "highlight-marker",    label: "Highlight Marker",     desc: "Hand-drawn yellow marker swipe.",                                       supported: true,  badge: "ready", previewSrc: "local" },
       ];
       const STYLE_BY_ID = Object.fromEntries(STYLE_LIST.map((s) => [s.id, s]));
       const SUPPORTED_STYLE_IDS = new Set(STYLE_LIST.filter((s) => s.supported && s.id !== "auto").map((s) => s.id));
@@ -1067,7 +1073,11 @@
       // ─── Style picker ────────────────────────────────────────────────────
       function previewUrlFor(style) {
         if (style.noPreview || style.id === "auto") return null;
-        return PREVIEW_BASE + (style.previewName || ("caption-" + style.id)) + ".mp4";
+        if (style.previewSrc === "local") {
+          return LOCAL_PREVIEW_BASE + style.id + ".mp4";
+        }
+        // Default: official HyperFrames catalog
+        return CATALOG_PREVIEW_BASE + (style.previewName || ("caption-" + style.id)) + ".mp4";
       }
 
       function buildStyleGrid(selectedId) {
