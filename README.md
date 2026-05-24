@@ -12,6 +12,36 @@
 
 ---
 
+## 🆕 NEW: yuv-design-system — single source of truth for visuals
+
+Yuval Avidani's canonical design system, now public. **Replaces** the prior `yuv-design` skill (which only covered the Warm Editorial pink/yellow/bone family). Encodes:
+
+- **Two palette modes** — **Fly High** (purple `#5E17EB` + yellow `#FFEC00` + grey, the default for keynotes / dashboards / dev-facing UIs) and **Warm Editorial** (pink + yellow + bone, only for the Hope / bigcats / practical.yuv.ai brand family)
+- **Mandatory typography** — Anton + Inter for English, Rubik + Assistant for Hebrew, letter-spacing 0 by default
+- **Signature components** — `PurpleBar`, `YellowUnderline`, `FlightHUD`, `CompassDial`, `CounterUp`, `HeroBg`
+- **Brand assets bundled** — 4 phoenix logos + studio portrait, with a 4-step asset-retrieval fallback chain for any machine
+- **Canonical link set + bio** — auto-included on any footer / about / credits block
+- **Lessons-learned reference** — 15 hardened production patterns (bilingual toggle, mobile hamburger threshold, Anton letter-spacing rules, yellow-span `line-height ≥ 1.0`, IntersectionObserver for GSAP catalogs, GH Pages cert nudge, …)
+- **Pre-flight checklist** — 14 mandatory checks before any visual ships
+
+🔗 **[View yuv-design-system →](skills/yuv-design-system/SKILL.md)**
+
+Pairs with `yuv-decks` (cinematic presentation builder), `yuv-viral-video` (short-form video), and `hyperframes` (capture web → MP4). Project brand wins when explicitly specified; otherwise this skill fills the vacuum.
+
+---
+
+## 🆕 NEW: yuv-decks — opinionated cinematic deck builder
+
+Builds open-slide presentation decks in Yuval Avidani's signature style: 4-act narrative arc (Boarding → Ascent → Cruise → Descent), Yuval voice (plain-language, no jargon, ≤8–12 word bullets, define every name), the flight-themed `JourneyBar` unifying every slide, reusable `UseCase` / `CaseStudy` / `LessonsGrid` templates, and an automatic orchestration of nano-banana cinematic hero images + Hyperframes video moments + Mermaid technical diagrams.
+
+Inherits all palette/typography/components from `yuv-design-system` — **defaults to Fly High purple**. For talks whose central metaphor IS literal flight, opt into the `cinematic-flight` mode (sky-blue + hot pink) — same arc and JourneyBar, different palette.
+
+🔗 **[View yuv-decks →](skills/yuv-decks/SKILL.md)**
+
+Reference implementation: <https://github.com/hoodini/build-agents-that-ship> (the NICE pre-hackathon "Build Agents That Ship" deck, May 2026).
+
+---
+
 ## 🆕 NEW: Parallax Landing Page Skill
 
 Turn any short video (5–15s) into a **cinematic scroll-driven landing page** where the
@@ -84,8 +114,8 @@ Whisper-supported language.
 Drop a video, get a cinematic **scroll-driven landing page** — Apple-style sticky hero where
 scrolling progresses the visible frame through the video. Extracts evenly-spaced frames via
 ffmpeg, builds a self-contained `index.html` with a `requestAnimationFrame`-driven scroll
-listener, and includes headline / sections / CTA below. Respects the `yuv-design` typography
-(Anton + Inter for English, Rubik + Assistant for Hebrew) and pink/yellow/bone palette.
+listener, and includes headline / sections / CTA below. Respects the `yuv-design-system` typography
+(Anton + Inter for English, Rubik + Assistant for Hebrew) and Fly High purple palette by default.
 
 🔗 **[View the Video-to-Landing-Page Skill →](skills/video-to-landing-page/SKILL.md)**
 
@@ -374,6 +404,9 @@ Agent Skills work with these AI coding agents:
 
 | Skill | Description | Keywords |
 |:------|:------------|:---------|
+| **[yuv-design-system](skills/yuv-design-system/SKILL.md)** 🆕 | Yuv's canonical visual brand — Fly High purple (default) + Warm Editorial pink, Anton/Inter + Rubik/Assistant, signature components, brand assets, canonical bio/links, 15 hardened production patterns | `design system`, `brand`, `Fly High`, `Warm Editorial`, `Anton`, `Rubik`, `PurpleBar`, `YellowUnderline`, `FlightHUD`, `yuv.ai` |
+| **[yuv-decks](skills/yuv-decks/SKILL.md)** 🆕 | Open-slide cinematic deck builder — 4-act narrative arc, Yuval voice, JourneyBar, reusable templates, automatic nano-banana + Hyperframes orchestration | `deck`, `presentation`, `slides`, `talk`, `keynote`, `open-slide`, `cinematic deck`, `מצגת`, `שקפים` |
+| **[yuv-viral-video](skills/yuv-viral-video/SKILL.md)** | Short-form video editor — liquid-glass cards, dark-mode, MrBeast-paced cuts, karaoke captions, ALWAYS 9:16 + 16:9, never covers the speaker's face | `viral video`, `reel`, `short`, `selfie edit`, `liquid glass`, `karaoke captions`, `ויראלי`, `ריל` |
 | **[parallax-landing-page](skills/parallax-landing-page/SKILL.md)** 🆕 | Cinematic scroll-scrub landing page from a short video — locked body, virtual scroll, 5 crossfading scenes, Anton + Caveat typography | `parallax landing`, `scroll-scrub`, `frame-by-frame`, `Anton`, `Caveat`, `locked hero`, `virtual scroll`, `video to landing page` |
 | **[video-edit](skills/video-edit/SKILL.md)** 🆕 | Captioned-video pipeline with interactive transcript editor + WebLLM suggestions before render | `video edit`, `captions`, `transcribe`, `Hebrew`, `WebLLM`, `liquid-glass captions`, `HyperFrames` |
 | **[video-to-landing-page](skills/video-to-landing-page/SKILL.md)** 🆕 | Apple-style scroll-driven landing page from any video — frames scrub on scroll | `landing page from video`, `scroll-frame`, `Apple scroll`, `scrub on scroll` |

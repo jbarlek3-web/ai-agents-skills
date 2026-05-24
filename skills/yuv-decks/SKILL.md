@@ -1,15 +1,36 @@
 ---
 name: yuv-decks
-description: Build cinematic, journey-themed presentation decks in Yuval Avidani's signature style using @open-slide/core. The user describes a topic and audience; this skill scaffolds an open-slide project, drafts the 4-act narrative arc (Boarding → Ascent → Cruise → Descent), writes every slide in the Yuval voice (plain-language, no jargon, story-driven), applies the sky-themed cinematic visual language, and orchestrates companion skills for hero images and video moments. Triggers on "make a deck", "create slides", "build a presentation", "build a deck", "new deck", "presentation about", "talk deck", "hackathon deck", "open-slide deck", "yuv-decks", "yuv deck", "deck like Yuval", "מצגת", "שקפים", "דק", "מצגת על", "להכין מצגת". Use proactively whenever the user asks for ANY slide-based presentation; the skill self-selects the right scope.
+description: Build cinematic, narrative-driven presentation decks in Yuval Avidani's signature style using @open-slide/core. The user describes a topic and audience; this skill scaffolds an open-slide project, drafts the 4-act narrative arc (Boarding → Ascent → Cruise → Descent), writes every slide in the Yuval voice (plain-language, no jargon, story-driven), applies the brand visual language from yuv-design-system, and orchestrates companion skills for hero images and video moments. Triggers on "make a deck", "create slides", "build a presentation", "build a deck", "new deck", "presentation about", "talk deck", "hackathon deck", "open-slide deck", "yuv-decks", "yuv deck", "deck like Yuval", "מצגת", "שקפים", "דק", "מצגת על", "להכין מצגת". Use proactively whenever the user asks for ANY slide-based talk; the skill self-selects the right scope.
 ---
 
 # yuv-decks — Build Yuval Avidani-style cinematic decks
 
-A complete playbook for creating presentation decks that match Yuval's signature style: **eye-level voice, cinematic flight metaphor, story-driven case studies, real citations, zero jargon, and a unified visual language across every slide.**
+The opinionated playbook for **talk decks** built on open-slide. Defines:
+
+- **The Yuval voice** — plain-language, no jargon, story-driven
+- **The 4-act narrative arc** — Boarding → Ascent → Cruise → Descent
+- **The JourneyBar** — the single unifying visual on every slide
+- **Companion-skill orchestration** — yuv-design-system, slide-authoring, nano-banana-pro, hyperframes, mermaid
+
+**Visual palette is pulled from `yuv-design-system`** — Fly High purple by default (matches the rest of Yuval's brand). For talks whose central metaphor IS literal flight, opt into the **cinematic-flight** mode (sky-blue + hot pink) — see Step 5.
 
 This skill is the distillation of building "Build Agents That Ship" for the NICE pre-hackathon (May 2026). Read it end-to-end before drafting any slides.
 
-**Reference implementation**: <https://github.com/hoodini/build-agents-that-ship> (private — contains the 24-slide deck this skill was extracted from).
+**Reference implementation**: <https://github.com/hoodini/build-agents-that-ship> (private — clone if you have access; the entire pattern this skill describes is implemented there).
+
+---
+
+## What this skill builds on
+
+`yuv-decks` is the **opinionated layer**. It explicitly delegates to:
+
+| Skill | Owns | When to consult |
+|---|---|---|
+| **`yuv-design-system`** | Palette, typography, animation library, brand assets, signature components (`PurpleBar`, `YellowUnderline`, `FlightHUD`, `CompassDial`, `CounterUp`, `HeroBg`), canonical social links, Hyperframes patterns | Always. Step 5, Step 6, and any time you touch palette/type/components. |
+| **`slide-authoring`** | Open-slide file contract, 1920×1080 canvas, type scale defaults, vertical budget math, asset paths, hard framework rules | When writing the JSX for each page (Step 6 onward). |
+| **`create-slide`** | Generic open-slide author (asks scoping questions and picks a theme) | For non-Yuval-voice decks (other people, generic content). `yuv-decks` supersedes it for Yuval's signature talk style. |
+
+The yuv-decks rules **add on top** of yuv-design-system and slide-authoring; they never override them.
 
 ---
 
@@ -49,6 +70,7 @@ Before drafting, lock in these four decisions via a single `AskUserQuestion` (mu
 2. **Page count** — Short (5–6), Standard (8–10), Deep dive (12–24).
 3. **Language** — English / Hebrew / Bilingual. Yuval is bilingual; pick based on audience.
 4. **Speaker context** — Is Yuval the presenter? Is this for a specific company (NICE, etc.)? Knowing the host lets you craft callback moments ("…yes, the company you're sitting in…").
+5. **Visual mode** — Fly High (default purple) or cinematic-flight (sky-blue + hot pink, only when the talk's central metaphor IS literal flight). When in doubt: Fly High.
 
 Do NOT skip this step. Every redirect later in the build traces back to a wrong assumption here.
 
@@ -143,47 +165,70 @@ Always anchor with three **real, public, verifiable** stories:
 
 ---
 
-## Step 5 — Visual Language (the sky-themed cinematic flight metaphor)
+## Step 5 — Visual Language
 
-Every deck shares the same visual vocabulary. The deck must FEEL like a flight.
+The deck inherits **all** of its palette, typography, signature components, and animation defaults from **`yuv-design-system`**. Read those sections first:
 
-### Palette
+- `yuv-design-system` **§1** — Palette modes (Fly High default; Warm Editorial for the brand family)
+- `yuv-design-system` **§2** — Typography (Anton + Inter for English, Rubik + Assistant for Hebrew, letter-spacing 0 default)
+- `yuv-design-system` **§6** — Signature components (`PurpleBar`, `YellowUnderline`, `FlightHUD`, `CompassDial`, `CounterUp`, `HeroBg`)
+- `yuv-design-system` **§7** — Animation defaults + Hyperframes compatibility
+- `yuv-design-system` **§3** — Brand assets (logo wordmark for watermarks, profile photo for about slides)
+
+This skill is **opinionated only about what's unique to talk decks** — the narrative arc, the journey indicator, the cinematic-flight optional mode, the deck-specific entrance animation. Everything else: read the design system.
+
+### Default mode: Fly High (purple)
+
+Fly High is the default for all decks. Pulled from `yuv-design-system` §1:
+
+```css
+:root {
+  --yuv-purple:      #5E17EB;   /* act-slide backgrounds, vertical accent bars, journey trail */
+  --yuv-purple-dark: #3D0DA8;
+  --yuv-yellow:      #FFEC00;   /* loud accent only — never a background */
+  --yuv-grey:        #F1F2F2;   /* content-slide background */
+  --yuv-white:       #FFFFFF;
+  --yuv-black:       #000000;
+}
+```
+
+**The two-background rule** (non-negotiable, from yuv-design-system):
+
+- **Act slides** (cover, section dividers, hero stats, closer) — **purple background**, white headline, large Anton type.
+- **Content slides** (everything else — info, evidence, lists) — **light-grey `#F1F2F2` background**, black headline.
+
+No third background colour. Ever. Yellow is an accent, never a background.
+
+The `<PurpleBar>`, `<YellowUnderline>`, `<FlightHUD>` components from `yuv-design-system` §6 ARE the deck's signature visual elements — use them.
+
+### Optional mode: cinematic-flight (sky-blue + hot pink)
+
+Only use when the talk's central metaphor IS literal flight (i.e., the "Build Agents That Ship" NICE deck where every slide leans into the flight arc). Most talks should stay on Fly High.
+
 ```ts
-const design: DesignSystem = {
-  palette: {
-    bg: '#dceaf6',        // sky-blue base
-    text: '#1a1814',      // charcoal
-    accent: '#ff3b8a',    // hot pink — the trail color
-  },
-  fonts: {
-    display: '"Anton", "Impact", "Helvetica Neue Condensed", system-ui, sans-serif',
-    body: '"Inter", system-ui, -apple-system, sans-serif',
-  },
-  typeScale: { hero: 168, body: 36 },
-  radius: 6,
-};
-
-const palette = {
-  ...design.palette,
-  yellow: '#ffd76e',      // soft sun
-  cloudWhite: '#ffffff',  // card fill
+const cinematicFlight = {
+  bg: '#dceaf6',        // sky-blue base
+  text: '#1a1814',      // charcoal
+  accent: '#ff3b8a',    // hot pink — the trail color
+  yellow: '#ffd76e',    // soft sun
+  cloudWhite: '#ffffff',
   skyDeep: '#7ab0d4',
   warmGray: '#6b7a8a',
-  red: '#c8403d',         // failure indicators
-  green: '#2f7d4f',       // success indicators
+  red: '#c8403d',       // failure indicators
+  green: '#2f7d4f',     // success indicators
   shadow: 'rgba(80, 120, 180, 0.20)',
   hairline: 'rgba(26, 60, 100, 0.18)',
 };
 ```
 
-### Typography
-- **Display**: Anton — heavy condensed, ALL CAPS, sized 80–200px. Loaded via Google Fonts `@import` inside a `<style>` tag (no npm deps).
-- **Body**: Inter — weights 500–700, sized 14–32px, letter-spacing 0.18–0.28em on small caps.
-- **Mono** (for formulas/code): JetBrains Mono.
+In cinematic-flight mode, swap the JourneyBar trail to `--accent` (hot pink) and use sky-blue as the act-slide background instead of purple. Everything else (Anton + Inter typography, JourneyBar structure, narrative arc, voice rules, reusable templates) is identical.
 
-### The journey indicator (on every slide, top edge)
+### The JourneyBar — the signature unifying element
 
-This is the **single most powerful unifying element**. Thin dashed flight-route line from "DEPART · [host company]" to "ARRIVE · [outcome]". Pink solid trail fills as you progress through the deck. A small ✈ airplane icon sits at the current position with **dynamic pitch**:
+This is **yuv-decks' single most powerful unifying element**, on every slide at the top edge.
+
+Thin dashed flight-route line from `DEPART · [host company]` to `ARRIVE · [outcome]`. Solid trail fills as you progress through the deck (uses active palette's accent: purple in Fly High, hot pink in cinematic-flight). A small ✈ airplane icon sits at the current position with **dynamic pitch**:
+
 - Act I Boarding → 90° (level, taxiing)
 - Act II Ascent → 58° (nose up, climbing)
 - Act III Cruise → 90° (level, cruise)
@@ -191,13 +236,16 @@ This is the **single most powerful unifying element**. Thin dashed flight-route 
 
 Three terminal-dots mark the act boundaries. Phase label below the bar: `II · ASCENT 2/4`.
 
-### Cinematic backgrounds
+### Cinematic backgrounds (full-bleed nano-banana)
+
 Every non-video slide gets a **full-bleed nano-banana image at 100% opacity** with:
-- A Ken Burns pan animation (`yuv-cinematic-pan`, 22s, `scale 1.04 → 1.06`, `translateX ±12px`)
+
+- Ken Burns pan animation (`yuv-cinematic-pan`, 22s, `scale 1.04 → 1.06`, `translateX ±12px`)
 - A directional bone-wash gradient (`textZone: 'left' | 'right' | 'bottom'`) keeping the text readable where it lives
 - White content cards floating on top of the cinematic image
 
 ### Page entrance animation
+
 ```css
 @keyframes yuv-page-enter {
   0%   { opacity: 0; transform: scale(1.06); filter: blur(10px); }
@@ -205,24 +253,42 @@ Every non-video slide gets a **full-bleed nano-banana image at 100% opacity** wi
   100% { opacity: 1; transform: scale(1); filter: blur(0); }
 }
 ```
+
 Every slide enters with a 0.65s scale-and-defocus. Feels like a film cut.
 
 ---
 
 ## Step 6 — Companion skills (when to invoke which)
 
-This skill orchestrates other skills. Invoke them at the right moment:
+This skill orchestrates others. Invoke them at the right moment:
 
 | Skill | When to invoke | What it does |
 |---|---|---|
-| **yuv-design** | At the start, for fonts, palette, motion fundamentals beyond what this skill specifies. | Yuval's full design system (typography pairings, signature elements). |
-| **nano-banana-pro** (or `anthropic-skills:nano-banana-2`) | After Step 5 — to generate cinematic hero/atmospheric images for every major slide. **Requires `GEMINI_API_KEY`.** | Image generation. Use the prompt template below. |
-| **hyperframes** | For 4–5 high-impact video moments (cover intro, big-number reveal, case-study timelines, closing flourish). | HTML/CSS/GSAP video composition → renders to MP4 embedded as `<video>` in the slide. |
-| **mermaid-diagrams** | For technical architecture diagrams when SVG is heavier than needed. | Clean flowcharts/sequence diagrams. |
+| **`yuv-design-system`** | Always — Step 5 and any palette/type/component decision | Visual brand source of truth. Pull palette tokens, type rules, signature components, brand assets, social link footer from here. |
+| **`slide-authoring`** | Step 6 onward — when writing JSX | Open-slide hard rules: file contract, 1920×1080 canvas, vertical budget math, asset paths. |
+| **`nano-banana-pro`** (or `anthropic-skills:nano-banana-2`) | After Step 5 — to generate cinematic hero/atmospheric images for every major slide. **Requires `GEMINI_API_KEY`.** | Image generation. Use the prompt template below. |
+| **`hyperframes`** | For 4–5 high-impact video moments (cover intro, big-number reveal, case-study timelines, closing flourish). | HTML/CSS/GSAP video composition → renders to MP4 embedded as `<video>` in the slide. |
+| **`mermaid-diagrams`** | For technical architecture diagrams when SVG is heavier than needed. | Clean flowcharts/sequence diagrams. |
 | **Excalidraw MCP** (`create_view`) | For live-in-chat hand-drawn workflow diagrams you can show the user during design discussion. | Interactive Excalidraw rendering. |
-| **video-edit** / **yuv-viral-video** | If the talk includes pre-recorded selfie footage that needs to be embedded. | Video editing pipeline. |
+| **`video-edit`** / **`yuv-viral-video`** | If the talk includes pre-recorded selfie footage that needs to be embedded. | Video editing pipeline. |
 
-### nano-banana prompt template (memorize this exact structure)
+### nano-banana prompt template
+
+Two flavours — match the active visual mode.
+
+**For Fly High mode (default):**
+
+```
+[Scene description — 1–2 sentences, 16:9 cinematic frame, single focal subject]
+
+STYLE: Cinematic editorial poster, electric-optimism dev-keynote aesthetic.
+Vibrant. Luminous. Deep purple (#5E17EB) primary tones, electric yellow (#FFEC00)
+warm accent lighting, near-black (#000000) shadows, soft grey (#F1F2F2) negative
+space. Sharp lighting contrast. Generous space for typography overlay.
+Movie poster, not infographic. NO TEXT. NO LOGOS. NO READABLE LETTERS.
+```
+
+**For cinematic-flight mode:**
 
 ```
 [Scene description — 1–2 sentences, 16:9 cinematic frame, single focal subject]
@@ -238,21 +304,18 @@ Always: single focal subject (not a montage), one third of the frame as quiet sk
 
 ---
 
-## Step 7 — open-slide rules (hard constraints)
+## Step 7 — open-slide framework rules
 
-These are non-negotiable from the open-slide framework:
+All open-slide framework rules live in **`slide-authoring`**:
 
-- **Canvas**: 1920×1080 FIXED. Use absolute pixel values (no `rem`, no `vh`, no `%` for type).
-- **Files**: Every deck under `slides/<kebab-case-id>/index.tsx`. Assets under `slides/<id>/assets/`. Do NOT touch `package.json`, `open-slide.config.ts`, or sibling slides.
-- **Dependencies**: Only `react` and standard web APIs. No GSAP, no Framer Motion, no Tailwind. Use CSS keyframes inside an injected `<style>` tag. Use Google Fonts via `@import` in the same `<style>`.
-- **Export contract**: `export default [Page1, Page2, …] satisfies Page[]` and optional `export const meta: SlideMeta = { title: '…' }`.
-- **Design tokens**: `export const design: DesignSystem = { … }` at module top makes the slide tweakable from the Design panel.
-- **Vertical budget math** (CRITICAL): every page must fit 1080px. Do the math BEFORE writing JSX:
-  ```
-  font_size × line_height × lines + gaps + 2 × padding ≤ 1080
-  ```
-  If close, **split into two pages**. Do not use `overflow: auto` to hide content.
-- **Bullet rule**: bullets must NOT wrap to a second line. If they would, either shorten the copy or move to its own page.
+- File contract (`export default [Page, …] satisfies Page[]`)
+- 1920×1080 canvas, absolute px values only
+- Single `index.tsx` per deck, assets under `slides/<id>/assets/`
+- No new dependencies (`react` + standard web APIs only)
+- Vertical budget math (every page must fit 1080px — bullets must NOT wrap)
+- No `overflow: auto`
+
+Read `slide-authoring` end-to-end before writing any page JSX. The yuv-decks rules ADD on top of these framework rules; they never override them.
 
 ---
 
@@ -270,7 +333,7 @@ Used for the three case studies. Top: status pill + period. Big company name. Ta
 Used right after each case study. Headline + 4 numbered cards in a 2×2 grid + colored takeaway strip ("Take this with you · …").
 
 ### `JourneyBar` — flight-path indicator at the top of every slide
-The unifying element. Renders the dashed full route, the pink solid trail filled to current %, three terminal dots, and the airplane icon with phase-dependent angle.
+The unifying element. Renders the dashed full route, the solid trail filled to current % (purple in Fly High, hot pink in cinematic-flight), three terminal dots, and the airplane icon with phase-dependent angle.
 
 ### `AtmosphericBg` — backdrop with `cinematic` mode
 ```tsx
@@ -286,13 +349,15 @@ The full source for these templates is in `slides/claude-cowork-enterprise/index
 ```
 1.  Get the customer's agenda (literal bullets). Map slides 1:1.
 2.  Bootstrap: npx @open-slide/cli init <slug> && cd <slug> && npm install && npm run dev
-3.  Ask the 4 scoping questions (Step 1). Lock in answers.
+3.  Ask the 5 scoping questions (Step 1). Lock in answers — including visual mode.
 4.  Draft the 4-act outline (Step 3). Confirm with user before writing JSX.
 5.  Write all slide components in a single index.tsx under slides/<deck-id>/.
     Use the reusable templates (UseCase, CaseStudy, LessonsGrid).
+    Pull palette tokens + signature components from yuv-design-system.
 6.  Add JourneyBar with PHASES matching your 4 acts.
 7.  Invoke nano-banana-pro: generate ~10 cinematic atmospheric images
-    (one per major slide). Save to slides/<deck-id>/assets/.
+    (one per major slide, using the mode-appropriate prompt template).
+    Save to slides/<deck-id>/assets/.
 8.  Invoke hyperframes for 4–5 video moments (cover intro, hook reveal,
     case-study timelines, closing). Render to MP4, drop into assets/.
 9.  Wire images and videos into slides. Use AtmosphericBg cinematic for
@@ -312,13 +377,14 @@ The full source for these templates is in `slides/claude-cowork-enterprise/index
 - ❌ **ROI math with division formulas** → use plain English ("Did it pay for itself? = What you got back ÷ What you spent.")
 - ❌ **"Should you build it?" as 4 bullet points** → use a 2×2 quadrant matrix (high/low volume × repetitive/creative). Visual matrix is 10× clearer than prose.
 - ❌ **Mgmt-pitch slides** in a hackathon deck → cut. Wrong audience.
-- ❌ **Light-on-bone palette** when the metaphor is flight → switch to sky-blue + cinematic dark. Aesthetic must match metaphor.
+- ❌ **Using cinematic-flight for a non-flight-metaphor talk** → default to Fly High purple. cinematic-flight is reserved for talks where literal flight IS the arc.
 - ❌ **Same template for every slide** → looks uniform but boring. Add cinematic backgrounds per slide for unity-with-variety.
 - ❌ **Citing fabricated stats** to a developer audience → use rules of thumb instead, or cut the number entirely.
 - ❌ **EBIT, PoC, RAG, BYOC** dumped without definition → audience tunes out within 30 seconds.
 - ❌ **"Watson failed because of misalignment"** → too abstract. Be specific: "Trained on textbook cases. Real patients aren't in the textbook."
 - ❌ **Layouts that wrap text on bullets** → shorten or split.
 - ❌ **`overflow: auto`** to hide overflowing content → the canvas doesn't scroll. Cropped content is gone.
+- ❌ **Stacking multiple Anton elements on one slide** → see yuv-design-system §6 "One Anton element per slide / section."
 
 ---
 
