@@ -1,6 +1,6 @@
 # Design Notes — Scroll-Driven Landing Page
 
-Defaults align with the `yuv-frontend-design` skill. **A project-specific brand system always
+Defaults align with the `yuv-design-system` skill (Fly High purple by default). **A project-specific brand system always
 wins** — only fall back to these when no brand is specified.
 
 ## Typography

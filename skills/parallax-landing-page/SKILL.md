@@ -23,6 +23,23 @@ Each landing is a single locked viewport with:
 
 Total weight at q:v 2: roughly 120–220 KB per frame × frame count. A 6-second 24fps clip = 145 frames ≈ 25 MB. A 10-second clip = 241 frames ≈ 53 MB.
 
+## Save location
+
+**Default:** `~/Documents/yuv-projects/landings/<slug>/` — always save standalone landings here so you can find them again. Override only if the user explicitly picks a different location OR if Mode B (integrate into the existing `examples/parasites/` showcase) is selected.
+
+```bash
+mkdir -p ~/Documents/yuv-projects/landings
+cd ~/Documents/yuv-projects/landings
+# The skill creates <slug>/ here as it extracts frames and builds the HTML.
+```
+
+Final path (Mode A — standalone): `~/Documents/yuv-projects/landings/<slug>/`.
+Final path (Mode B — integrate): the existing showcase directory the user chose.
+
+Tell the user the final path at the end of every build.
+
+---
+
 ## Workflow
 
 There are four phases. Don't skip phases — each one feeds the next.

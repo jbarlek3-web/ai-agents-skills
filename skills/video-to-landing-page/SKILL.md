@@ -13,11 +13,25 @@ Build a cinematic landing page where the hero is a video playing **on scroll** i
 - Mentions of "Apple-style scroll", "GitHub Copilot landing", "scrub-on-scroll", "frame on scroll"
 - Hebrew equivalents: "דף נחיתה מסרטון", "אתר עם גלילה", "סרטון בגלילה"
 
+## Save location
+
+**Default:** `~/Documents/yuv-projects/landings/<slug>/` — always save landing pages here so you can find them again. Create the parent directory if missing.
+
+```bash
+mkdir -p ~/Documents/yuv-projects/landings
+cd ~/Documents/yuv-projects/landings
+# Build <slug>/ here.
+```
+
+Final path: `~/Documents/yuv-projects/landings/<slug>/`. Tell the user where the landing lives at the end of every build.
+
+---
+
 ## Workflow (8 steps)
 
 1. **Probe the source** — `ffprobe` for duration, fps, dimensions, audio.
 2. **Pick frame count** — default `80`. Floor `40` (choppy if lower), ceiling `160` (heavy page). Choose by duration: ≤10s → 50, 10–30s → 80, 30–60s → 120, >60s → 160.
-3. **Decide output directory** — typically `landing-<videoname>/`.
+3. **Decide output directory** — default `~/Documents/yuv-projects/landings/<slug>/`. The `<slug>` is short, derived from the video name or the topic. Override only on explicit request.
 4. **Extract frames** — run `references/extract-frames.py <source-video> <output-dir> [count]`. Outputs `output-dir/frames/f_0001.jpg`… with consistent JPG quality 82 and a max-width of 1920 (downscaled if source is larger).
 5. **Copy and customise** `references/landing-template.html` into `output-dir/index.html`:
    - Replace the `__FRAMES__` placeholder with `<img>` tags for each frame (the build script does this for you when you pass `--build-html`).
@@ -37,7 +51,7 @@ Build a cinematic landing page where the hero is a video playing **on scroll** i
 
 ## Design rules
 
-- Use the project's design system if specified, otherwise default to the **yuv-frontend-design** skill: Anton + Inter (English) / Rubik + Assistant (Hebrew), pink (`#ff3da6`) + yellow (`#ffd24a`) + bone (`#f5f0d0`) palette, off-white (never pure `#fff`), 0px or 999px radii (no 8–12px corners).
+- Use the project's design system if specified, otherwise default to the **yuv-design-system** skill: Anton + Inter (English) / Rubik + Assistant (Hebrew), **Fly High purple** (`#5E17EB`) + yellow (`#FFEC00`) + grey (`#F1F2F2`) palette, off-white (never pure `#fff`), 0px or 999px radii (no 8–12px corners). Warm Editorial (pink+yellow+bone) is reserved for the Hope/bigcats brand family only.
 - Hero overlays should be **subtle** — a vignette and a single big headline; don't drown the frame.
 - Below-hero sections: bone background, large Anton heading, body copy in Inter at 18–22px, CTA as a sharp pink rectangle with Anton text.
 - For Hebrew: respect RTL, use Rubik 900 for headlines, Assistant 400/500 for body.

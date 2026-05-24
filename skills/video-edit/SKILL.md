@@ -13,10 +13,24 @@ End-to-end captioned video editor on top of HyperFrames. The user gives you a vi
 - "Fix the captions / Hebrew misspells" — re-enter at the review step on an existing project
 - Any captioned tutorial / talking-head / promo build
 
+## Save location
+
+**Default:** `~/Documents/yuv-projects/videos/<slug>/` — always save captioned video projects here so renders are findable. The `<slug>` is short, derived from the topic or source filename.
+
+```bash
+mkdir -p ~/Documents/yuv-projects/videos
+cd ~/Documents/yuv-projects/videos
+# Initialize the project here.
+```
+
+Final render lands at `~/Documents/yuv-projects/videos/<slug>/renders/<name>_FINAL.mp4`. Tell the user where the video lives at the end of the render.
+
+---
+
 ## Workflow (12 steps)
 
 1. **Probe the source** — `ffprobe` for dimensions, fps, duration, audio.
-2. **Scaffold** — `npx hyperframes init <name> --video <path> --non-interactive`. Rename the copied video to `source.mp4`.
+2. **Scaffold** — `cd ~/Documents/yuv-projects/videos && npx hyperframes init <slug> --video <path> --non-interactive`. Rename the copied video to `source.mp4`.
 3. **Extract audio** — `ffmpeg -i source.mp4 -vn -ac 1 -ar 16000 audio.wav`.
 4. **Transcribe** — copy `references/transcribe.py` into the project. Default model `large-v3` (best Hebrew). CUDA usually fails on Windows (missing cuDNN); the script falls back to CPU int8. Force `language="he"` for Hebrew, `language="en"` for English; otherwise auto-detect.
 5. **Apply known corrections** — copy `references/corrections-hebrew.md` content into a `corrections.json` at the project root (keys = wrong token, values = correct token).

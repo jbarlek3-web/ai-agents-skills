@@ -50,13 +50,19 @@ Do NOT invoke for: a single landing page, a video, a document, a Google Slide Po
 
 ## Step 0 — Bootstrap the project
 
+**Default save location:** `~/Documents/yuv-projects/decks/<deck-slug>/` — always save decks here so you can find them again later. The skill creates the parent directory if it doesn't exist. Override only if the user explicitly asks for a different location.
+
 ```bash
 # Pick a slug. Lowercase, hyphenated, descriptive.
+mkdir -p ~/Documents/yuv-projects/decks
+cd ~/Documents/yuv-projects/decks
 npx @open-slide/cli init <deck-slug>
 cd <deck-slug>
 npm install
 npm run dev   # starts the preview at http://localhost:5173
 ```
+
+Final path: `~/Documents/yuv-projects/decks/<deck-slug>/`. Tell the user where the deck lives at the end of every session.
 
 The scaffold creates `slides/getting-started/` (a demo). You will create your own slide under `slides/<deck-id>/index.tsx` and delete or ignore the demo.
 

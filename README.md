@@ -10,6 +10,33 @@
 
 <h1 align="center">🧠 Agent Skills Repository</h1>
 
+<p align="center">
+  <strong>Created by <a href="https://yuv.ai">Yuval Avidani</a></strong> · <em>AI Builder, Speaker, 2× GitHub Star, AWS GenAI Superstar, AI commentator on Channel 12 News (Israel)</em><br/>
+  <a href="https://yuv.ai">yuv.ai</a> · <a href="https://linktr.ee/yuvai">all links</a> · <a href="https://x.com/yuvalav">@yuvalav</a> · <a href="https://instagram.com/yuval_770">@yuval_770</a> · <a href="https://youtube.com/@yuv-ai">YouTube</a> · <a href="https://github.com/hoodini">GitHub</a>
+</p>
+
+---
+
+## ⚡ Install the full creative stack in one command
+
+```bash
+curl -sSL https://raw.githubusercontent.com/hoodini/ai-agents-skills/master/install.sh | bash
+```
+
+Installs **14 skills** as one package: **yuv-design-system** (brand) · **yuv-decks** (cinematic presentations) · **yuv-viral-video** (short-form) · **video-edit** · **video-to-landing-page** · **parallax-landing-page** · **hyperframes** + 4 companions · **nano-banana-pro** (AI images) · **mermaid-diagrams**. Plus ffmpeg / Node / Python / faster-whisper / hyperframes CLI / Python venvs. Works on macOS, Linux, Windows (Git Bash/WSL).
+
+After install, restart your agent and just type what you want:
+
+```
+"make a deck about <topic> for <audience>"
+"build a stunning parallax landing page from this video: <path>"
+"edit this video into a viral short: <path>"
+```
+
+The right skill auto-fires. Projects save to **`~/Documents/yuv-projects/{decks,landings,videos}/<slug>/`** so they're always findable.
+
+> 🌐 **Live examples:** [yuv.ai](https://yuv.ai) · [effects.yuv.ai](https://effects.yuv.ai) (HyperFrames effects catalog) · [examples/parasites/](examples/parasites/) (three parallax landings: GitHub Desktop, Marcus the lion, Hope the cheetah)
+
 ---
 
 ## 🆕 NEW: yuv-design-system — single source of truth for visuals
@@ -214,33 +241,47 @@ A universal skill that configures ALL your AI coding agents to be honest, object
 
 ---
 
-## 👤 Author
+## 👋 About Yuval Avidani
 
 <table>
 <tr>
-<td width="150">
-<img src="https://avatars.githubusercontent.com/yuval-avidani" width="150" alt="Yuval Avidani"/>
+<td width="180" valign="top">
+<a href="https://yuv.ai"><img src="https://github.com/hoodini.png?size=180" width="180" alt="Yuval Avidani"/></a>
 </td>
-<td>
+<td valign="top">
 
-### **Yuval Avidani**
-**AI Builder & Speaker** | **GitHub Star ⭐** | **AWS GenAI Superstar 🌟**
+### **Yuval Avidani** — *AI Builder & Speaker · Founder of YUV.AI*
 
-Building the future with AI agents, automation, and cutting-edge technology.  
-20+ years turning complex ideas into production-ready solutions.
+**🏆 2× GitHub Star** · **🌟 AWS Gen AI Superstar** · **📺 AI commentator on Channel 12 News (Israel)** · **🎤 Enterprise AI Trainer**
 
-[![Website](https://img.shields.io/badge/YUV.AI-Website-blue?style=flat-square&logo=safari)](https://yuv.ai)
-[![GitHub](https://img.shields.io/badge/GitHub-yuval--avidani-181717?style=flat-square&logo=github)](https://github.com/yuval-avidani)
-[![Projects](https://img.shields.io/badge/Open%20Source-110%2B%20Projects-green?style=flat-square&logo=opensourceinitiative)](https://github.com/yuval-avidani)
+> Founder of **YUV.AI** — leading Hebrew-speaking AI educator and technical innovator. Builds, teaches, and ships AI that actually works. Open-source maintainer of 110+ projects spanning AI agents, video pipelines, design systems, and developer tools.
 
-🎤 **Speaker & Enterprise AI Trainer**  
-🏆 **Recognized for open-source contributions**
+**Hebrew bio:** *יובל אבידני — מגיש פינת AI בחדשות 12, GitHub Star כפול, AWS Gen AI Superstar, מייסד YUV.AI. בונה, מלמד, ומשגר AI שעובד.*
 
 </td>
 </tr>
 </table>
 
-> 🤖 *This repository was created by Yuval Avidani using **GitHub Copilot** via **VS Code Insiders** — demonstrating the power of AI-assisted development!*
+### 🔗 Find me everywhere
+
+<p>
+  <a href="https://yuv.ai"><img src="https://img.shields.io/badge/yuv.ai-website-5E17EB?style=for-the-badge&logo=safari&logoColor=FFEC00" /></a>
+  <a href="https://linktr.ee/yuvai"><img src="https://img.shields.io/badge/Linktree-all_links-39E09B?style=for-the-badge&logo=linktree&logoColor=white" /></a>
+  <a href="https://x.com/yuvalav"><img src="https://img.shields.io/badge/X-@yuvalav-000000?style=for-the-badge&logo=x&logoColor=white" /></a>
+  <a href="https://instagram.com/yuval_770"><img src="https://img.shields.io/badge/Instagram-@yuval__770-E4405F?style=for-the-badge&logo=instagram&logoColor=white" /></a>
+  <a href="https://www.tiktok.com/@yuval.ai"><img src="https://img.shields.io/badge/TikTok-@yuval.ai-000000?style=for-the-badge&logo=tiktok&logoColor=white" /></a>
+  <a href="https://youtube.com/@yuv-ai"><img src="https://img.shields.io/badge/YouTube-@yuv--ai-FF0000?style=for-the-badge&logo=youtube&logoColor=white" /></a>
+  <a href="https://github.com/hoodini"><img src="https://img.shields.io/badge/GitHub-@hoodini-181717?style=for-the-badge&logo=github&logoColor=white" /></a>
+  <a href="https://www.linkedin.com/in/yuval-avidani-87081474/"><img src="https://img.shields.io/badge/LinkedIn-Yuval_Avidani-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" /></a>
+  <a href="https://facebook.com/yuval.avidani"><img src="https://img.shields.io/badge/Facebook-Yuval_Avidani-1877F2?style=for-the-badge&logo=facebook&logoColor=white" /></a>
+</p>
+
+### 💼 Work with me
+
+- **🎓 Practical Claude Desktop course** → <https://practical.yuv.ai>
+- **🚀 Enterprise AI training & speaking** → DM on [LinkedIn](https://www.linkedin.com/in/yuval-avidani-87081474/) or [@yuvalav](https://x.com/yuvalav)
+- **🤝 Built something with this stack?** Tag [@yuvalav](https://x.com/yuvalav) on X or DM [@yuval_770](https://instagram.com/yuval_770) on Instagram — I'll feature the best work
+- **⭐ Star this repo** if it saves you time — helps other builders find it
 
 ---
 
@@ -820,15 +861,27 @@ MIT License — Feel free to use, modify, and distribute.
 ---
 
 <p align="center">
-  <strong>Made with ❤️ by <a href="https://yuv.ai">Yuval Avidani</a></strong>
+  <a href="https://yuv.ai"><img src="https://img.shields.io/badge/yuv.ai-5E17EB?style=flat-square&logo=safari&logoColor=FFEC00" /></a>
+  <a href="https://linktr.ee/yuvai"><img src="https://img.shields.io/badge/Linktree-39E09B?style=flat-square&logo=linktree&logoColor=white" /></a>
+  <a href="https://x.com/yuvalav"><img src="https://img.shields.io/badge/X-@yuvalav-000000?style=flat-square&logo=x&logoColor=white" /></a>
+  <a href="https://instagram.com/yuval_770"><img src="https://img.shields.io/badge/IG-@yuval__770-E4405F?style=flat-square&logo=instagram&logoColor=white" /></a>
+  <a href="https://www.tiktok.com/@yuval.ai"><img src="https://img.shields.io/badge/TikTok-@yuval.ai-000000?style=flat-square&logo=tiktok&logoColor=white" /></a>
+  <a href="https://youtube.com/@yuv-ai"><img src="https://img.shields.io/badge/YouTube-@yuv--ai-FF0000?style=flat-square&logo=youtube&logoColor=white" /></a>
+  <a href="https://github.com/hoodini"><img src="https://img.shields.io/badge/GitHub-@hoodini-181717?style=flat-square&logo=github&logoColor=white" /></a>
+  <a href="https://www.linkedin.com/in/yuval-avidani-87081474/"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white" /></a>
+  <a href="https://facebook.com/yuval.avidani"><img src="https://img.shields.io/badge/Facebook-1877F2?style=flat-square&logo=facebook&logoColor=white" /></a>
 </p>
 
 <p align="center">
-  <em>Building AI agents that matter</em>
+  <strong>Made with ❤️ by <a href="https://yuv.ai">Yuval Avidani</a> · YUV.AI</strong><br/>
+  <em>Building AI agents that ship · Let's Fly High 🚀</em>
 </p>
 
 <p align="center">
-  <a href="https://github.com/yuval-avidani">
-    <img src="https://img.shields.io/badge/Follow-@yuval--avidani-181717?style=social&logo=github" alt="Follow on GitHub"/>
+  <a href="https://github.com/hoodini/ai-agents-skills">
+    <img src="https://img.shields.io/github/stars/hoodini/ai-agents-skills?style=social" alt="Star this repo"/>
+  </a>
+  <a href="https://github.com/hoodini">
+    <img src="https://img.shields.io/badge/Follow-@hoodini-181717?style=social&logo=github" alt="Follow on GitHub"/>
   </a>
 </p>
