@@ -130,6 +130,67 @@
       }
       .or-divider::before { right: 100%; }
       .or-divider::after { left: 100%; }
+
+      /* Recents */
+      .recents-wrap { width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 14px; }
+      .recents-wrap.hidden { display: none; }
+      .recents-head {
+        font-family: "Inter", sans-serif; font-size: 11px;
+        letter-spacing: 0.3em; text-transform: uppercase;
+        color: var(--muted); padding: 0 4px;
+        display: flex; align-items: center; justify-content: space-between;
+      }
+      .recents-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 12px;
+      }
+      .recent-card {
+        background: var(--panel); border: 1px solid var(--line);
+        padding: 14px 16px; cursor: pointer;
+        transition: border-color 0.15s, background 0.15s, transform 0.15s;
+        position: relative;
+        display: flex; flex-direction: column; gap: 6px;
+      }
+      .recent-card:hover { border-color: var(--pink); background: var(--panel-2); transform: translateY(-1px); }
+      .recent-card .name {
+        font-family: "JetBrains Mono", "Courier New", monospace;
+        font-size: 13px; color: var(--ink);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .recent-card .meta {
+        font-family: "Inter", sans-serif; font-size: 11px;
+        color: var(--muted);
+        display: flex; justify-content: space-between; gap: 8px;
+      }
+      .recent-card .meta .flag {
+        background: rgba(255, 61, 166, 0.12); color: var(--pink);
+        padding: 1px 6px; font-size: 10px; font-weight: 600;
+        text-transform: uppercase;
+      }
+      .recent-card .approved {
+        font-family: "Inter", sans-serif; font-size: 10px;
+        color: var(--green); letter-spacing: 0.06em;
+      }
+      .recent-card .actions {
+        position: absolute; top: 8px; right: 8px; display: flex; gap: 4px;
+        opacity: 0; transition: opacity 0.15s;
+      }
+      .recent-card:hover .actions { opacity: 1; }
+      .recent-card .act {
+        background: var(--bg); border: 1px solid var(--line);
+        color: var(--muted); cursor: pointer;
+        padding: 2px 6px; font-size: 11px;
+      }
+      .recent-card .act:hover { color: var(--pink); border-color: var(--pink); }
+      .recents-clear {
+        background: transparent; border: 0; color: var(--muted);
+        font-size: 11px; cursor: pointer;
+        font-family: "Inter", sans-serif;
+        letter-spacing: 0.12em; text-transform: uppercase;
+      }
+      .recents-clear:hover { color: var(--red); }
+
       .file-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
       .file-btn {
         padding: 14px 28px; background: var(--panel);
@@ -376,6 +437,15 @@
         and the source video automatically, and writes <code>transcript_review.txt</code>
         back to the same folder when you save. Everything runs in your browser.
       </p>
+
+      <div class="recents-wrap hidden" id="recents-wrap">
+        <div class="recents-head">
+          <span>Recent projects</span>
+          <button class="recents-clear" id="recents-clear" title="Clear history">Clear</button>
+        </div>
+        <div class="recents-grid" id="recents-grid"></div>
+      </div>
+
       <button class="folder-btn" id="btn-folder">
         <span class="icon">📁</span>
         <span>Select project folder</span>
@@ -490,6 +560,8 @@
       let onEditor = false;      // true once openEditor() has run
       let serverMode = false;    // true when loaded from serve_review.py (Approve & Render)
       const STORAGE_KEY = "hyperframes_transcript_edit_v1";
+      const RECENTS_KEY = "hyperframes_editor_recents_v1";
+      const RECENTS_LIMIT = 18;
 
       const $ = (id) => document.getElementById(id);
       const make = (tag, props) => {
@@ -536,6 +608,9 @@
       }
 
       // ─── File loading (individual pickers) ───────────────────────────────
+      let lastTrscName = null;
+      let lastVidName = null;
+
       $("in-trsc").addEventListener("change", async (e) => {
         const f = e.target.files[0];
         if (!f) return;
@@ -545,6 +620,7 @@
           if (!Array.isArray(transcript)) throw new Error("transcript.json must be an array");
           $("lbl-trsc").classList.add("ready");
           $("lbl-trsc").querySelector(".lbl-text").textContent = f.name;
+          lastTrscName = f.name;
           updateStatus();
           checkReady();
         } catch (err) { toast("Failed to load transcript", { type: "error", sub: err.message }); }
@@ -556,6 +632,7 @@
         videoUrl = URL.createObjectURL(f);
         $("lbl-vid").classList.add("ready");
         $("lbl-vid").querySelector(".lbl-text").textContent = f.name;
+        lastVidName = f.name;
         checkReady();
       });
 
@@ -655,6 +732,15 @@
 
         projectDir = dir;
         projectDirName = dir.name + "/";
+        pushRecent({
+          id: "folder:" + dir.name,
+          name: dir.name,
+          source: "folder",
+          videoName: vidFile.name,
+          segmentCount: transcript.length,
+          language: detectLang(transcript),
+          transcriptSnapshot: JSON.parse(JSON.stringify(transcript)),
+        });
         openEditor();
         toast("Loaded " + projectDirName, {
           type: "success",
@@ -680,6 +766,15 @@
 
       $("start").addEventListener("click", () => {
         if (!transcript || !videoUrl) return;
+        pushRecent({
+          id: "files:" + (lastTrscName || "transcript.json"),
+          name: lastTrscName ? lastTrscName.replace(/\.json$/, "") : "files",
+          source: "files",
+          videoName: lastVidName || "(video)",
+          segmentCount: transcript.length,
+          language: detectLang(transcript),
+          transcriptSnapshot: JSON.parse(JSON.stringify(transcript)),
+        });
         openEditor();
       });
 
@@ -1191,6 +1286,165 @@
         }
       });
 
+      // ─── Recent projects (localStorage + optional server registry) ──────
+      function loadLocalRecents() {
+        try {
+          const raw = localStorage.getItem(RECENTS_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch { return []; }
+      }
+      function saveLocalRecents(list) {
+        try { localStorage.setItem(RECENTS_KEY, JSON.stringify(list.slice(0, RECENTS_LIMIT))); } catch {}
+      }
+      function pushRecent(entry) {
+        const list = loadLocalRecents().filter((e) => e.id !== entry.id);
+        list.unshift({ ...entry, openedAt: new Date().toISOString() });
+        saveLocalRecents(list);
+      }
+      function deleteRecent(id) {
+        saveLocalRecents(loadLocalRecents().filter((e) => e.id !== id));
+        renderRecents();
+      }
+      function detectLang(transcript) {
+        for (const seg of (transcript || []).slice(0, 5)) {
+          for (const ch of (seg.text || "")) {
+            if (ch >= "֐" && ch <= "׿") return "he";
+          }
+        }
+        return "en";
+      }
+      function timeAgo(iso) {
+        if (!iso) return "";
+        const s = (Date.now() - new Date(iso).getTime()) / 1000;
+        if (s < 60) return Math.floor(s) + "s ago";
+        if (s < 3600) return Math.floor(s / 60) + "m ago";
+        if (s < 86400) return Math.floor(s / 3600) + "h ago";
+        return Math.floor(s / 86400) + "d ago";
+      }
+      async function fetchServerRecents() {
+        try {
+          const r = await fetch("/api/recents", { cache: "no-store" });
+          if (!r.ok) return [];
+          const data = await r.json();
+          return (data.projects || []).map((p) => ({
+            id: "srv:" + p.path,
+            name: p.name,
+            source: "server",
+            path: p.path,
+            videoName: p.video,
+            segmentCount: p.segmentCount || 0,
+            language: p.language || "en",
+            openedAt: p.openedAt,
+            approvedAt: p.approvedAt,
+          }));
+        } catch { return []; }
+      }
+      async function renderRecents() {
+        const local = loadLocalRecents();
+        const server = await fetchServerRecents();
+        // Merge: keep newest occurrence of each id+path combo.
+        const merged = [];
+        const seen = new Set();
+        for (const e of [...local, ...server]) {
+          const key = e.id || ("srv:" + e.path);
+          if (seen.has(key)) continue;
+          seen.add(key);
+          merged.push(e);
+        }
+        merged.sort((a, b) => (b.openedAt || "").localeCompare(a.openedAt || ""));
+        const wrap = $("recents-wrap");
+        const grid = $("recents-grid");
+        while (grid.firstChild) grid.removeChild(grid.firstChild);
+        if (merged.length === 0) {
+          wrap.classList.add("hidden");
+          return;
+        }
+        wrap.classList.remove("hidden");
+        merged.slice(0, RECENTS_LIMIT).forEach((entry) => {
+          const card = make("div", { class: "recent-card" });
+          card.dataset.id = entry.id;
+          const name = make("div", { class: "name", text: entry.name || entry.path || "—" });
+          const meta = make("div", { class: "meta" });
+          meta.appendChild(make("span", { text: entry.segmentCount + " seg • " + (entry.videoName || "video") }));
+          meta.appendChild(make("span", { class: "flag", text: entry.language || "?" }));
+          const sub = make("div", { class: "meta" });
+          sub.appendChild(make("span", { text: timeAgo(entry.openedAt) }));
+          if (entry.approvedAt) sub.appendChild(make("span", { class: "approved", text: "✓ APPROVED" }));
+          card.appendChild(name);
+          card.appendChild(meta);
+          card.appendChild(sub);
+          const actions = make("div", { class: "actions" });
+          if (entry.transcriptSnapshot) {
+            const dl = make("button", { class: "act", title: "Download transcript_review.txt", text: "↓" });
+            dl.addEventListener("click", (e) => {
+              e.stopPropagation();
+              downloadReviewFromEntry(entry);
+            });
+            actions.appendChild(dl);
+          }
+          const rm = make("button", { class: "act", title: "Remove from history", text: "✕" });
+          rm.addEventListener("click", (e) => { e.stopPropagation(); deleteRecent(entry.id); });
+          actions.appendChild(rm);
+          card.appendChild(actions);
+          card.addEventListener("click", () => openFromRecent(entry));
+          grid.appendChild(card);
+        });
+      }
+      function downloadReviewFromEntry(entry) {
+        if (!entry.transcriptSnapshot) {
+          toast("No saved transcript for this project", { type: "warn" });
+          return;
+        }
+        const lines = [
+          "# Transcript Review",
+          "# Edit the TEXT of any line — fix mishears, tighten phrasing.",
+          "# KEEP the [mm:ss.xx] prefix unchanged — that anchors the word timings.",
+          "# Save the file and tell the agent to continue.",
+          "",
+        ];
+        entry.transcriptSnapshot.forEach((seg) => {
+          lines.push("[" + fmtTime(seg.start) + "] " + seg.text);
+        });
+        const blob = new Blob([lines.join("\n") + "\n"], { type: "text/plain;charset=utf-8" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = (entry.name || "project") + "_transcript_review.txt";
+        document.body.appendChild(a); a.click(); a.remove();
+      }
+      function openFromRecent(entry) {
+        if (!entry.transcriptSnapshot) {
+          toast("This is a server-side entry", {
+            type: "warn",
+            sub: "Re-run the agent on " + (entry.path || entry.name) + " to open it interactively.",
+            duration: 6500,
+          });
+          return;
+        }
+        transcript = JSON.parse(JSON.stringify(entry.transcriptSnapshot));
+        videoUrl = null;
+        projectDir = null;
+        projectDirName = entry.name + "/";
+        $("upload").classList.add("hidden");
+        $("editor").classList.remove("hidden");
+        renderSegments();
+        document.querySelectorAll(".nav-only").forEach((el) => el.classList.remove("hidden"));
+        $("project-chip").classList.remove("hidden");
+        $("project-chip-text").textContent = "📜 " + projectDirName + "(restored from history)";
+        onEditor = true;
+        updateStatus();
+        toast("Restored " + entry.name, {
+          type: "warn",
+          sub: "No video attached — re-pick the folder to enable video preview + save-in-place.",
+          duration: 7000,
+        });
+      }
+      $("recents-clear").addEventListener("click", () => {
+        if (!confirm("Clear all recent projects?")) return;
+        saveLocalRecents([]);
+        renderRecents();
+      });
+      renderRecents();
+
       // ─── Server-mode auto-load (when served by serve_review.py) ─────────
       (async function detectServerMode() {
         try {
@@ -1219,6 +1473,17 @@
 
           // Repurpose the save button as the Approve action
           $("btn-save").textContent = "✓ APPROVE & RENDER";
+
+          // Also save to client-side recents so the user can browse later
+          pushRecent({
+            id: "srv:" + (data.projectName || "project"),
+            name: data.projectName || "project",
+            source: "server",
+            videoName: "(served)",
+            segmentCount: transcript.length,
+            language: detectLang(transcript),
+            transcriptSnapshot: JSON.parse(JSON.stringify(transcript)),
+          });
 
           // Disable the "open another project" button — we're locked to this one
           $("btn-newproject").classList.add("hidden");

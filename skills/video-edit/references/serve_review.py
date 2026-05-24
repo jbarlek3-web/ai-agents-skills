@@ -14,6 +14,7 @@ Usage:
 """
 
 import argparse
+import datetime
 import json
 import os
 import sys
@@ -28,6 +29,72 @@ try:
     sys.stderr.reconfigure(encoding="utf-8")
 except Exception:
     pass
+
+
+# ── Persistent recents registry ─────────────────────────────────────────
+REGISTRY_DIR = os.path.expanduser("~/.hyperframes-editor")
+REGISTRY_PATH = os.path.join(REGISTRY_DIR, "projects.json")
+REGISTRY_LIMIT = 50
+
+
+def _load_registry():
+    try:
+        with open(REGISTRY_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {"projects": []}
+    except FileNotFoundError:
+        return {"projects": []}
+    except Exception:
+        return {"projects": []}
+
+
+def _save_registry(data):
+    os.makedirs(REGISTRY_DIR, exist_ok=True)
+    tmp = REGISTRY_PATH + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=1)
+    os.replace(tmp, REGISTRY_PATH)
+
+
+def register_project(project_dir, video_path, transcript):
+    """Push (or update) this project at the head of the recents list."""
+    abs_path = os.path.abspath(project_dir)
+    name = os.path.basename(abs_path)
+    now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+    entry = {
+        "path": abs_path,
+        "name": name,
+        "video": os.path.basename(video_path),
+        "segmentCount": len(transcript),
+        "language": (transcript[0].get("language") if transcript else None) or _detect_lang(transcript),
+        "openedAt": now,
+    }
+    data = _load_registry()
+    projects = [p for p in data.get("projects", []) if p.get("path") != abs_path]
+    projects.insert(0, entry)
+    data["projects"] = projects[:REGISTRY_LIMIT]
+    _save_registry(data)
+
+
+def mark_approved(project_dir):
+    abs_path = os.path.abspath(project_dir)
+    now = datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+    data = _load_registry()
+    for p in data.get("projects", []):
+        if p.get("path") == abs_path:
+            p["approvedAt"] = now
+            break
+    _save_registry(data)
+
+
+def _detect_lang(transcript):
+    """Heuristic: if any segment contains Hebrew chars, call it Hebrew."""
+    HEB_RX = "֐׿"
+    for seg in transcript[:5] if transcript else []:
+        for ch in seg.get("text", ""):
+            if "֐" <= ch <= "׿":
+                return "he"
+    return "en"
 
 # Editor lives at  ../transcript-editor/index.html  (relative to this script).
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -81,6 +148,15 @@ class ReviewHandler(BaseHTTPRequestHandler):
             self.wfile.write(body)
         elif self.path == "/video":
             self._serve_video()
+        elif self.path == "/api/recents":
+            data = _load_registry()
+            body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
         else:
             self.send_response(404)
             self.end_headers()
@@ -98,6 +174,10 @@ class ReviewHandler(BaseHTTPRequestHandler):
                 self._json(500, {"ok": False, "error": str(exc)})
                 return
             self._json(200, {"ok": True, "path": out_path})
+            try:
+                mark_approved(self.project_dir)
+            except Exception:
+                pass
             # Signal the main thread to shut the server down + exit 0.
             self.approved_event.set()
         else:
@@ -205,6 +285,14 @@ def main():
     ReviewHandler.transcript_path = transcript_path
     ReviewHandler.video_path = video_path
     ReviewHandler.approved_event = approved_event
+
+    # Register this project in the persistent recents list immediately.
+    try:
+        with open(transcript_path, encoding="utf-8") as f:
+            _tr = json.load(f)
+        register_project(project_dir, video_path, _tr)
+    except Exception as exc:
+        print(f"(could not update recents registry: {exc})", file=sys.stderr)
 
     server = ThreadingHTTPServer(("127.0.0.1", args.port), ReviewHandler)
     port = server.server_port
