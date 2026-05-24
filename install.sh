@@ -149,15 +149,19 @@ mkdir -p "$HOME/Developer"
 ok "$HOME/.claude/skills"
 ok "$HOME/Developer"
 
-# ─── 1. yuv-viral-video + yuv-design (hoodini/ai-agents-skills) ──
-step "Installing yuv-viral-video and yuv-design"
+# ─── 1. yuv-viral-video + yuv-design + video-edit + video-to-landing-page ──
+step "Installing yuv-viral-video, yuv-design, video-edit, video-to-landing-page"
 
 CLONE_TMP="$(mktemp -d)/ai-agents-skills"
 git clone --depth 1 --filter=blob:none --sparse \
   https://github.com/hoodini/ai-agents-skills "$CLONE_TMP" >/dev/null 2>&1
-( cd "$CLONE_TMP" && git sparse-checkout set skills/yuv-viral-video skills/yuv-design >/dev/null 2>&1 )
+( cd "$CLONE_TMP" && git sparse-checkout set \
+    skills/yuv-viral-video \
+    skills/yuv-design \
+    skills/video-edit \
+    skills/video-to-landing-page >/dev/null 2>&1 )
 
-for skill in yuv-viral-video yuv-design; do
+for skill in yuv-viral-video yuv-design video-edit video-to-landing-page; do
   if [ -d "$HOME/.claude/skills/$skill" ]; then
     info "$skill already exists — refreshing"
     rm -rf "$HOME/.claude/skills/$skill"
@@ -167,6 +171,21 @@ for skill in yuv-viral-video yuv-design; do
 done
 
 rm -rf "$(dirname "$CLONE_TMP")"
+
+# ─── 1b. faster-whisper for the video-edit pipeline ──────────
+step "Installing faster-whisper (video-edit transcription)"
+WHISPER_OK=0
+if command -v uv >/dev/null 2>&1; then
+  uv pip install --system --quiet faster-whisper >/dev/null 2>&1 && WHISPER_OK=1
+fi
+if [ "$WHISPER_OK" -eq 0 ]; then
+  python3 -m pip install --quiet --user faster-whisper >/dev/null 2>&1 && WHISPER_OK=1
+fi
+if [ "$WHISPER_OK" -eq 1 ]; then
+  ok "faster-whisper installed (CPU int8 ready; large-v3 model auto-downloads on first run)"
+else
+  warn "faster-whisper install failed — run \`pip install faster-whisper\` manually"
+fi
 
 # Python venv for yuv-viral-video
 step "Setting up yuv-viral-video Python venv"
@@ -279,7 +298,7 @@ INSTALLED_SKILLS=$(ls "$HOME/.claude/skills" | tr '\n' ' ')
 ok "Installed skills: $INSTALLED_SKILLS"
 
 ALL_GOOD=1
-for skill in yuv-viral-video yuv-design video-use hyperframes hyperframes-cli gsap website-to-hyperframes; do
+for skill in yuv-viral-video yuv-design video-edit video-to-landing-page video-use hyperframes hyperframes-cli gsap website-to-hyperframes; do
   if [ -e "$HOME/.claude/skills/$skill" ]; then
     ok "$skill"
   else
@@ -287,6 +306,13 @@ for skill in yuv-viral-video yuv-design video-use hyperframes hyperframes-cli gs
     ALL_GOOD=0
   fi
 done
+
+# faster-whisper availability check
+if python3 -c "import faster_whisper" >/dev/null 2>&1; then
+  ok "faster-whisper Python package available"
+else
+  warn "faster-whisper not importable — video-edit transcribe will fail. Run: pip install faster-whisper"
+fi
 
 # Verify Python environments
 if [ -f "$HOME/.claude/skills/yuv-viral-video/.venv/bin/python" ]; then
