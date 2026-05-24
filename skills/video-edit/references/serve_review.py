@@ -128,6 +128,15 @@ class ReviewHandler(BaseHTTPRequestHandler):
 
     # ── GET ───────────────────────────────────────────────────────────────
     def do_GET(self):
+        # Style-preview clips bundled with the editor (./previews/<id>.mp4)
+        if self.path.startswith("/previews/") and ".." not in self.path:
+            rel = self.path.lstrip("/")
+            fp = os.path.join(EDITOR_DIR, rel)
+            if os.path.isfile(fp):
+                self._serve_file(fp, "video/mp4")
+                return
+            self.send_response(404); self.end_headers(); return
+
         if self.path in ("/", "/editor", "/index.html"):
             self._serve_file(os.path.join(EDITOR_DIR, "index.html"), "text/html; charset=utf-8")
         elif self.path == "/api/project":
