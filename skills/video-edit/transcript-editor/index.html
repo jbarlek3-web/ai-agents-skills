@@ -32,34 +32,109 @@
         overflow: hidden;
         -webkit-font-smoothing: antialiased;
       }
+      button { font: inherit; color: inherit; }
+
+      /* ── Header ── */
       header {
-        height: 56px;
+        height: 60px;
         border-bottom: 1px solid var(--line);
         display: flex; align-items: center;
-        padding: 0 24px; gap: 24px;
+        padding: 0 12px 0 20px; gap: 14px;
         background: var(--panel);
       }
-      header h1 {
+      .brand {
+        display: flex; align-items: center; gap: 12px;
         font-family: "Anton", sans-serif;
-        font-size: 22px; letter-spacing: 0.04em; color: var(--pink);
+        font-size: 20px; letter-spacing: 0.04em; color: var(--pink);
+        cursor: pointer;
+        background: transparent; border: 0; padding: 0;
       }
-      header .status { margin-left: auto; font-size: 13px; color: var(--muted); }
-      header .status.dirty { color: var(--yellow); }
+      .brand:hover { color: var(--yellow); }
+      .brand .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--pink); }
+      .brand:hover .dot { background: var(--yellow); }
 
+      .nav-sep { width: 1px; height: 24px; background: var(--line); }
+
+      .nav-btn {
+        background: transparent; border: 1px solid transparent;
+        color: var(--ink); cursor: pointer;
+        padding: 8px 14px; font-size: 13px; font-weight: 500;
+        font-family: "Inter", sans-serif;
+        display: flex; align-items: center; gap: 8px;
+        white-space: nowrap;
+      }
+      .nav-btn:hover { border-color: var(--line); background: var(--panel-2); }
+      .nav-btn .icon { font-size: 14px; }
+      .nav-btn.hidden { display: none; }
+
+      .project-chip {
+        display: flex; align-items: center; gap: 8px;
+        padding: 7px 12px;
+        background: rgba(0, 255, 138, 0.06);
+        border: 1px solid rgba(0, 255, 138, 0.25);
+        color: var(--green);
+        font-family: "JetBrains Mono", "Courier New", monospace;
+        font-size: 12px;
+      }
+      .project-chip.hidden { display: none; }
+
+      .header-spacer { flex: 1; }
+
+      .header-status {
+        font-size: 13px; color: var(--muted);
+        font-family: "Inter", sans-serif;
+        white-space: nowrap;
+      }
+      .header-status.dirty { color: var(--yellow); }
+
+      /* ── Upload screen ── */
       .upload {
         display: flex; align-items: center; justify-content: center;
-        height: calc(100vh - 56px); flex-direction: column;
+        height: calc(100vh - 60px); flex-direction: column;
         gap: 28px; padding: 40px;
+        position: relative;
       }
       .upload h2 {
         font-family: "Anton", sans-serif;
         font-size: 56px; color: var(--yellow); letter-spacing: 0.02em;
       }
-      .upload p { color: var(--muted); font-size: 16px; text-align: center; max-width: 60ch; }
+      .upload p {
+        color: var(--muted); font-size: 16px;
+        text-align: center; max-width: 60ch; line-height: 1.5;
+      }
+      .upload code {
+        background: var(--panel); padding: 2px 8px;
+        color: var(--yellow);
+        font-family: "JetBrains Mono", monospace; font-size: 13px;
+      }
+      .folder-btn {
+        padding: 22px 56px;
+        background: linear-gradient(135deg, var(--pink), #d12fb0);
+        color: var(--bg); border: 0;
+        font-family: "Anton", sans-serif;
+        font-size: 26px; letter-spacing: 0.05em;
+        cursor: pointer; text-transform: uppercase;
+        display: inline-flex; align-items: center; gap: 16px;
+        transition: filter 0.15s, transform 0.15s;
+      }
+      .folder-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+      .folder-btn .icon { font-size: 30px; }
+      .or-divider {
+        color: var(--muted); font-size: 11px;
+        letter-spacing: 0.3em; text-transform: uppercase;
+        position: relative; padding: 0 16px;
+      }
+      .or-divider::before, .or-divider::after {
+        content: ""; position: absolute; top: 50%;
+        width: 110px; height: 1px; background: var(--line);
+      }
+      .or-divider::before { right: 100%; }
+      .or-divider::after { left: 100%; }
       .file-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
       .file-btn {
-        padding: 14px 28px; background: var(--panel); border: 1px solid var(--line);
-        color: var(--ink); font-family: "Inter", sans-serif; font-size: 14px; font-weight: 600;
+        padding: 14px 28px; background: var(--panel);
+        border: 1px solid var(--line); color: var(--ink);
+        font-family: "Inter", sans-serif; font-size: 14px; font-weight: 600;
         cursor: pointer; display: flex; align-items: center; gap: 10px;
       }
       .file-btn input { display: none; }
@@ -74,62 +149,43 @@
         pointer-events: none; text-transform: uppercase;
       }
       .start-btn.ready { opacity: 1; pointer-events: auto; }
-      .folder-btn {
-        padding: 22px 56px;
-        background: linear-gradient(135deg, var(--pink), #d12fb0);
-        color: var(--bg);
-        border: 0;
+
+      /* Drop overlay */
+      .drop-overlay {
+        position: absolute; inset: 0;
+        background: rgba(255, 61, 166, 0.15);
+        border: 3px dashed var(--pink);
+        display: none;
+        align-items: center; justify-content: center;
+        pointer-events: none;
+        z-index: 5;
+      }
+      .drop-overlay.active { display: flex; }
+      .drop-overlay-text {
         font-family: "Anton", sans-serif;
-        font-size: 26px;
-        letter-spacing: 0.05em;
-        cursor: pointer;
+        font-size: 64px; color: var(--pink); letter-spacing: 0.04em;
         text-transform: uppercase;
-        display: inline-flex;
-        align-items: center;
-        gap: 16px;
-      }
-      .folder-btn:hover { filter: brightness(1.08); }
-      .folder-btn .icon { font-size: 30px; }
-      .or-divider {
-        color: var(--muted);
-        font-size: 11px;
-        letter-spacing: 0.3em;
-        text-transform: uppercase;
-        position: relative;
-        padding: 0 16px;
-      }
-      .or-divider::before, .or-divider::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        width: 110px;
-        height: 1px;
-        background: var(--line);
-      }
-      .or-divider::before { right: 100%; }
-      .or-divider::after { left: 100%; }
-      .project-tag {
-        padding: 8px 14px;
-        border-bottom: 1px solid var(--line);
-        font-size: 12px;
-        color: var(--green);
-        font-family: "JetBrains Mono", "Courier New", monospace;
-        text-align: center;
-        background: rgba(0, 255, 138, 0.04);
       }
 
-      .editor { display: grid; grid-template-columns: 1fr 480px; height: calc(100vh - 56px); }
+      /* ── Editor ── */
+      .editor { display: grid; grid-template-columns: 1fr 480px; height: calc(100vh - 60px); }
       .segments { overflow-y: auto; padding: 20px; }
+      .segments-empty {
+        padding: 40px; text-align: center; color: var(--muted); font-size: 14px;
+      }
       .segment {
-        padding: 12px 16px; margin-bottom: 8px; border: 1px solid var(--line);
-        background: var(--panel); cursor: pointer;
-        display: grid; grid-template-columns: 76px 1fr 40px;
-        gap: 12px; align-items: start;
+        padding: 12px 16px; margin-bottom: 8px;
+        border: 1px solid var(--line); background: var(--panel);
+        cursor: pointer; display: grid;
+        grid-template-columns: 76px 1fr 40px; gap: 12px;
+        align-items: start;
         transition: border-color 0.15s, background 0.15s;
       }
       .segment:hover { background: var(--panel-2); }
       .segment.active { border-color: var(--pink); background: var(--panel-2); }
-      .segment.dirty { border-left: 3px solid var(--yellow); padding-left: 14px; }
+      .segment.dirty {
+        border-left: 3px solid var(--yellow); padding-left: 14px;
+      }
       .seg-time {
         color: var(--muted); font-size: 12px;
         font-family: "JetBrains Mono", "Courier New", monospace; padding-top: 6px;
@@ -147,8 +203,8 @@
         align-items: center; padding-top: 2px;
       }
       .seg-action {
-        background: transparent; border: 0; color: var(--muted); cursor: pointer;
-        padding: 4px 8px; font-size: 16px; line-height: 1;
+        background: transparent; border: 0; color: var(--muted);
+        cursor: pointer; padding: 4px 8px; font-size: 16px; line-height: 1;
       }
       .seg-action:hover { color: var(--pink); }
       .seg-action.hidden { display: none; }
@@ -170,6 +226,7 @@
         background: transparent; color: var(--muted); border: 1px solid var(--muted);
       }
 
+      /* ── Preview ── */
       .preview {
         border-left: 1px solid var(--line); background: var(--panel);
         display: flex; flex-direction: column; overflow-y: auto;
@@ -214,6 +271,41 @@
         font-family: "JetBrains Mono", monospace; font-size: 11px;
       }
 
+      /* ── Toast ── */
+      #toast-stack {
+        position: fixed;
+        right: 20px; bottom: 20px;
+        display: flex; flex-direction: column-reverse;
+        gap: 8px; z-index: 2000;
+        pointer-events: none;
+      }
+      .toast {
+        background: var(--panel-2);
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--pink);
+        padding: 14px 20px;
+        font-size: 14px; color: var(--ink);
+        min-width: 280px; max-width: 480px;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
+        animation: slideIn 0.25s ease-out;
+        pointer-events: auto;
+        font-family: "Inter", sans-serif;
+      }
+      .toast.success { border-left-color: var(--green); }
+      .toast.error { border-left-color: var(--red); }
+      .toast.warn { border-left-color: var(--yellow); }
+      .toast.fading { animation: slideOut 0.3s ease-in forwards; }
+      .toast b { font-weight: 600; }
+      .toast .sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
+      @keyframes slideIn {
+        from { opacity: 0; transform: translateX(40px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+      @keyframes slideOut {
+        to { opacity: 0; transform: translateX(40px); }
+      }
+
+      /* ── Modal ── */
       .modal {
         position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75);
         display: none; align-items: center; justify-content: center; z-index: 1000;
@@ -227,7 +319,7 @@
         margin-bottom: 8px; font-family: "Anton", sans-serif;
         color: var(--yellow); letter-spacing: 0.04em; font-size: 22px;
       }
-      .modal .sub { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+      .modal .sub { color: var(--muted); font-size: 13px; margin-bottom: 12px; line-height: 1.5; }
       .modal textarea, .modal input[type="text"] {
         width: 100%; background: var(--bg); color: var(--ink);
         border: 1px solid var(--line); padding: 10px;
@@ -239,21 +331,50 @@
       .modal input[type="text"] { margin-bottom: 10px; }
       .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 
+      .shortcuts-grid {
+        display: grid; grid-template-columns: auto 1fr; gap: 10px 24px;
+        margin: 16px 0; align-items: center;
+      }
+      .shortcuts-grid kbd {
+        background: var(--bg); padding: 4px 10px; border: 1px solid var(--line);
+        font-family: "JetBrains Mono", monospace; font-size: 12px;
+        color: var(--yellow);
+        min-width: 60px; text-align: center;
+      }
+      .shortcuts-grid span { font-size: 14px; color: var(--ink); }
+
       .hidden { display: none !important; }
     </style>
   </head>
   <body>
     <header>
-      <h1>HYPERFRAMES · TRANSCRIPT EDITOR</h1>
-      <div class="status" id="status">Drop a transcript.json + video to begin</div>
+      <button class="brand" id="brand-home" title="Back to upload screen">
+        <span class="dot"></span>
+        <span>HYPERFRAMES · TRANSCRIPT EDITOR</span>
+      </button>
+      <div class="nav-sep nav-only hidden"></div>
+      <button class="nav-btn nav-only hidden" id="btn-home" title="Back to upload screen">
+        <span class="icon">←</span><span>Home</span>
+      </button>
+      <button class="nav-btn nav-only hidden" id="btn-newproject" title="Load a different project (Ctrl+O)">
+        <span class="icon">📁</span><span>Open another project</span>
+      </button>
+      <div class="project-chip hidden" id="project-chip">
+        <span>📁</span><span id="project-chip-text"></span>
+      </div>
+      <div class="header-spacer"></div>
+      <button class="nav-btn" id="btn-help" title="Keyboard shortcuts (?)">
+        <span class="icon">⌨</span><span>Shortcuts</span>
+      </button>
+      <div class="header-status" id="status">Pick a project folder to begin</div>
     </header>
 
     <div class="upload" id="upload">
       <h2>Load your project</h2>
       <p>
-        Select a HyperFrames project folder — the editor finds <code style="color:var(--yellow)">transcript.json</code>
-        and the source video automatically, opens itself, and writes <code style="color:var(--yellow)">transcript_review.txt</code>
-        back into the same folder when you save. Everything runs in your browser.
+        Select a HyperFrames project folder — the editor finds <code>transcript.json</code>
+        and the source video automatically, and writes <code>transcript_review.txt</code>
+        back to the same folder when you save. Everything runs in your browser.
       </p>
       <button class="folder-btn" id="btn-folder">
         <span class="icon">📁</span>
@@ -273,13 +394,15 @@
         </label>
       </div>
       <button class="start-btn" id="start">OPEN EDITOR</button>
+      <div class="drop-overlay" id="drop-overlay">
+        <div class="drop-overlay-text">Drop to load</div>
+      </div>
     </div>
 
     <div class="editor hidden" id="editor">
       <div class="segments" id="segments"></div>
       <aside class="preview">
         <video id="vid" controls></video>
-        <div class="project-tag hidden" id="project-tag"></div>
         <div class="tools">
           <button class="tool-btn" id="btn-corrections">Apply corrections dictionary…</button>
           <button class="tool-btn" id="btn-find">Find / replace…</button>
@@ -289,21 +412,23 @@
             <div class="ai-progress"><div class="fill" id="ai-fill"></div></div>
           </div>
           <div class="hint">
-            <b>Workflow:</b> Click a segment to seek the video. Edit text inline. Yellow stripe
-            = edited. Save the file, drop it back in the project, and tell your agent to
-            <code>continue</code> — it will run <code>apply_review.py</code> and re-render.
+            <b>Workflow:</b> click a segment to seek the video, edit text inline (yellow
+            stripe = edited). Hit <b>Save</b> — when loaded from a folder it writes
+            <code>transcript_review.txt</code> back in place; then reply <code>continue</code>
+            to your agent and it will run <code>apply_review.py</code> + re-render.
           </div>
           <button class="tool-btn primary" id="btn-save">Save transcript_review.txt</button>
         </div>
       </aside>
     </div>
 
+    <!-- Corrections modal -->
     <div class="modal" id="modal-corrections">
       <div class="modal-content">
         <h3>Apply Corrections</h3>
         <p class="sub">
           Paste a JSON dictionary <code>{"wrong": "right", ...}</code>. Each matched whole-word
-          token gets replaced in every segment.
+          token is replaced across every segment.
         </p>
         <textarea id="corrections-json"></textarea>
         <div class="modal-actions">
@@ -313,6 +438,7 @@
       </div>
     </div>
 
+    <!-- Find/replace modal -->
     <div class="modal" id="modal-find">
       <div class="modal-content">
         <h3>Find / Replace</h3>
@@ -326,6 +452,31 @@
       </div>
     </div>
 
+    <!-- Help / Shortcuts modal -->
+    <div class="modal" id="modal-help">
+      <div class="modal-content">
+        <h3>Keyboard Shortcuts</h3>
+        <div class="shortcuts-grid">
+          <kbd>Space</kbd><span>Play / pause video</span>
+          <kbd>Ctrl/⌘ S</kbd><span>Save transcript_review.txt</span>
+          <kbd>Ctrl/⌘ O</kbd><span>Open another project</span>
+          <kbd>Ctrl/⌘ F</kbd><span>Find / replace</span>
+          <kbd>Esc</kbd><span>Close any open modal</span>
+          <kbd>?</kbd><span>Show this help</span>
+        </div>
+        <p class="sub" style="margin-top: 16px;">
+          The editor runs entirely in your browser. WebLLM AI suggestions need WebGPU
+          (Chrome / Edge 113+). Folder picker needs the File System Access API
+          (Chrome / Edge 86+, Safari 15.2+).
+        </p>
+        <div class="modal-actions">
+          <button class="tool-btn primary" data-close="modal-help">Got it</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast-stack"></div>
+
     <script type="module">
       // ─── State ───────────────────────────────────────────────────────────
       let transcript = null;
@@ -336,6 +487,7 @@
       let aiEnabled = false;
       let projectDir = null;     // FileSystemDirectoryHandle when picked via folder picker
       let projectDirName = "";   // Display name (e.g. "heb-showcase/")
+      let onEditor = false;      // true once openEditor() has run
       const STORAGE_KEY = "hyperframes_transcript_edit_v1";
 
       const $ = (id) => document.getElementById(id);
@@ -346,7 +498,6 @@
             if (k === "class") el.className = v;
             else if (k === "data") for (const [dk, dv] of Object.entries(v)) el.dataset[dk] = dv;
             else if (k === "text") el.textContent = v;
-            else if (k === "html") el.appendChild(v);
             else if (k in el) el[k] = v;
             else el.setAttribute(k, v);
           }
@@ -354,7 +505,36 @@
         return el;
       };
 
-      // ─── File loading ────────────────────────────────────────────────────
+      // ─── Toast notifications ─────────────────────────────────────────────
+      function toast(message, opts = {}) {
+        const t = make("div", { class: "toast" + (opts.type ? " " + opts.type : "") });
+        const title = make("div");
+        const b = make("b", { text: message });
+        title.appendChild(b);
+        t.appendChild(title);
+        if (opts.sub) {
+          t.appendChild(make("div", { class: "sub", text: opts.sub }));
+        }
+        $("toast-stack").appendChild(t);
+        setTimeout(() => {
+          t.classList.add("fading");
+          setTimeout(() => t.remove(), 320);
+        }, opts.duration || 3200);
+      }
+
+      // ─── Status helpers ──────────────────────────────────────────────────
+      function setStatus(text, dirty) {
+        const st = $("status");
+        st.textContent = text;
+        st.classList.toggle("dirty", !!dirty);
+      }
+      function updateStatus() {
+        if (!transcript) return setStatus("Pick a project folder to begin", false);
+        if (dirtyCount > 0) setStatus(dirtyCount + " edited · " + transcript.length + " segments", true);
+        else setStatus(transcript.length + " segments", false);
+      }
+
+      // ─── File loading (individual pickers) ───────────────────────────────
       $("in-trsc").addEventListener("change", async (e) => {
         const f = e.target.files[0];
         if (!f) return;
@@ -364,9 +544,9 @@
           if (!Array.isArray(transcript)) throw new Error("transcript.json must be an array");
           $("lbl-trsc").classList.add("ready");
           $("lbl-trsc").querySelector(".lbl-text").textContent = f.name;
-          $("status").textContent = transcript.length + " segments loaded";
+          updateStatus();
           checkReady();
-        } catch (err) { alert("Failed to load transcript: " + err.message); }
+        } catch (err) { toast("Failed to load transcript", { type: "error", sub: err.message }); }
       });
 
       $("in-vid").addEventListener("change", (e) => {
@@ -382,6 +562,7 @@
         $("start").classList.toggle("ready", !!transcript && !!videoUrl);
       }
 
+      // ─── Open editor ─────────────────────────────────────────────────────
       function openEditor() {
         const saved = loadAutosave();
         if (saved && saved.length === transcript.length) {
@@ -395,66 +576,178 @@
         $("vid").src = videoUrl;
         renderSegments();
         startActiveTracking();
-        updateStatus();
+        document.querySelectorAll(".nav-only").forEach((el) => el.classList.remove("hidden"));
         if (projectDirName) {
-          const tag = $("project-tag");
-          tag.textContent = "📁  " + projectDirName + " — saves write back here";
-          tag.classList.remove("hidden");
+          $("project-chip").classList.remove("hidden");
+          $("project-chip-text").textContent = projectDirName;
+        } else {
+          $("project-chip").classList.add("hidden");
         }
+        onEditor = true;
+        updateStatus();
       }
+
+      // ─── Home / back ─────────────────────────────────────────────────────
+      function goHome() {
+        if (!onEditor) return;
+        if (dirtyCount > 0) {
+          if (!confirm("You have " + dirtyCount + " unsaved edits. Go back and lose them?")) return;
+        }
+        $("editor").classList.add("hidden");
+        $("upload").classList.remove("hidden");
+        document.querySelectorAll(".nav-only").forEach((el) => el.classList.add("hidden"));
+        $("project-chip").classList.add("hidden");
+        // Reset state so the upload screen is fresh
+        transcript = null;
+        videoUrl = null;
+        projectDir = null;
+        projectDirName = "";
+        dirtyCount = 0;
+        onEditor = false;
+        $("lbl-trsc").classList.remove("ready");
+        $("lbl-trsc").querySelector(".lbl-text").textContent = "Transcript (.json)";
+        $("lbl-vid").classList.remove("ready");
+        $("lbl-vid").querySelector(".lbl-text").textContent = "Video (.mp4, .mov, .mkv)";
+        $("in-trsc").value = "";
+        $("in-vid").value = "";
+        $("start").classList.remove("ready");
+        $("vid").pause();
+        $("vid").src = "";
+        try { localStorage.removeItem(STORAGE_KEY); } catch {}
+        updateStatus();
+      }
+      $("btn-home").addEventListener("click", goHome);
+      $("brand-home").addEventListener("click", () => { if (onEditor) goHome(); });
+      $("btn-newproject").addEventListener("click", async () => {
+        if (dirtyCount > 0) {
+          if (!confirm("You have " + dirtyCount + " unsaved edits. Discard and load a new project?")) return;
+        }
+        goHome();
+        setTimeout(() => $("btn-folder").click(), 50);
+      });
+
+      // ─── Folder picker ───────────────────────────────────────────────────
+      async function loadFromDirHandle(dir) {
+        let trscHandle = null;
+        let vidHandle = null;
+        let vidPriority = -1;
+        const VIDEO_RX = /\.(mp4|mov|mkv|webm|m4v)$/i;
+        const VIDEO_PRIORITY = { "source.mp4": 3, "footage.mp4": 2 };
+
+        for await (const entry of dir.values()) {
+          if (entry.kind !== "file") continue;
+          if (entry.name === "transcript.json") trscHandle = entry;
+          else if (VIDEO_RX.test(entry.name)) {
+            const p = VIDEO_PRIORITY[entry.name.toLowerCase()] ?? 1;
+            if (p > vidPriority) { vidHandle = entry; vidPriority = p; }
+          }
+        }
+        if (!trscHandle) throw new Error("No transcript.json in this folder.");
+        if (!vidHandle) throw new Error("No video file (.mp4, .mov, .mkv, .webm) found.");
+
+        const trscFile = await trscHandle.getFile();
+        transcript = JSON.parse(await trscFile.text());
+        if (!Array.isArray(transcript)) throw new Error("transcript.json must be an array");
+
+        const vidFile = await vidHandle.getFile();
+        videoUrl = URL.createObjectURL(vidFile);
+
+        projectDir = dir;
+        projectDirName = dir.name + "/";
+        openEditor();
+        toast("Loaded " + projectDirName, {
+          type: "success",
+          sub: transcript.length + " segments • saves write back here",
+        });
+      }
+
+      $("btn-folder").addEventListener("click", async () => {
+        if (!window.showDirectoryPicker) {
+          toast("Folder picker not supported in this browser", {
+            type: "warn",
+            sub: "Use Chrome / Edge 86+ (or Safari 15.2+) — or pick files individually below.",
+          });
+          return;
+        }
+        try {
+          const dir = await window.showDirectoryPicker({ mode: "readwrite" });
+          await loadFromDirHandle(dir);
+        } catch (e) {
+          if (e.name !== "AbortError") toast("Failed to open folder", { type: "error", sub: e.message });
+        }
+      });
 
       $("start").addEventListener("click", () => {
         if (!transcript || !videoUrl) return;
         openEditor();
       });
 
-      // Folder picker — auto-detect transcript.json + a video, then auto-open the editor.
-      $("btn-folder").addEventListener("click", async () => {
-        if (!window.showDirectoryPicker) {
-          alert(
-            "Folder picker isn't supported in this browser.\n" +
-            "Use Chrome / Edge 86+ (or Safari 15.2+), or pick the files individually below."
-          );
-          return;
+      // ─── Drag & drop on upload screen ────────────────────────────────────
+      const overlay = $("drop-overlay");
+      const uploadEl = $("upload");
+      let dragDepth = 0;
+      uploadEl.addEventListener("dragenter", (e) => {
+        e.preventDefault();
+        dragDepth++;
+        overlay.classList.add("active");
+      });
+      uploadEl.addEventListener("dragover", (e) => e.preventDefault());
+      uploadEl.addEventListener("dragleave", () => {
+        dragDepth--;
+        if (dragDepth <= 0) {
+          dragDepth = 0;
+          overlay.classList.remove("active");
         }
-        try {
-          const dir = await window.showDirectoryPicker({ mode: "readwrite" });
+      });
+      uploadEl.addEventListener("drop", async (e) => {
+        e.preventDefault();
+        dragDepth = 0;
+        overlay.classList.remove("active");
 
-          let trscHandle = null;
-          let vidHandle = null;
-          let vidPriority = -1;
-          const VIDEO_RX = /\.(mp4|mov|mkv|webm|m4v)$/i;
-          // Prefer source.mp4 (raw), then footage.mp4 (re-encoded), then any other video
-          const VIDEO_PRIORITY = { "source.mp4": 3, "footage.mp4": 2 };
-
-          for await (const entry of dir.values()) {
-            if (entry.kind !== "file") continue;
-            if (entry.name === "transcript.json") trscHandle = entry;
-            else if (VIDEO_RX.test(entry.name)) {
-              const p = VIDEO_PRIORITY[entry.name.toLowerCase()] ?? 1;
-              if (p > vidPriority) { vidHandle = entry; vidPriority = p; }
-            }
+        const items = Array.from(e.dataTransfer.items || []);
+        // Try FS Access API getAsFileSystemHandle (Chrome/Edge) — directory drop
+        for (const item of items) {
+          if (typeof item.getAsFileSystemHandle === "function") {
+            try {
+              const handle = await item.getAsFileSystemHandle();
+              if (handle && handle.kind === "directory") {
+                await loadFromDirHandle(handle);
+                return;
+              }
+            } catch (_) {}
           }
-
-          if (!trscHandle) throw new Error("No transcript.json found in this folder.");
-          if (!vidHandle) throw new Error("No video file (.mp4, .mov, .mkv, .webm) found in this folder.");
-
-          const trscFile = await trscHandle.getFile();
-          transcript = JSON.parse(await trscFile.text());
-          if (!Array.isArray(transcript)) throw new Error("transcript.json must be an array of segments");
-
-          const vidFile = await vidHandle.getFile();
+        }
+        // Fallback: handle dropped files individually
+        const files = Array.from(e.dataTransfer.files || []);
+        let trscFile = null;
+        let vidFile = null;
+        for (const f of files) {
+          if (f.name.endsWith(".json")) trscFile = f;
+          else if (/\.(mp4|mov|mkv|webm|m4v)$/i.test(f.name)) vidFile = f;
+        }
+        if (trscFile) {
+          try {
+            transcript = JSON.parse(await trscFile.text());
+            $("lbl-trsc").classList.add("ready");
+            $("lbl-trsc").querySelector(".lbl-text").textContent = trscFile.name;
+          } catch (err) { toast("Bad transcript.json", { type: "error", sub: err.message }); }
+        }
+        if (vidFile) {
           videoUrl = URL.createObjectURL(vidFile);
-
-          projectDir = dir;
-          projectDirName = dir.name + "/";
+          $("lbl-vid").classList.add("ready");
+          $("lbl-vid").querySelector(".lbl-text").textContent = vidFile.name;
+        }
+        if (transcript && videoUrl) {
           openEditor();
-        } catch (e) {
-          if (e.name !== "AbortError") alert("Failed to open folder: " + e.message);
+        } else if (!trscFile && !vidFile) {
+          toast("Drop a project folder, or a .json + video file", { type: "warn" });
+        } else {
+          checkReady();
+          updateStatus();
         }
       });
 
-      // ─── Render ──────────────────────────────────────────────────────────
+      // ─── Render segments ─────────────────────────────────────────────────
       function buildSegmentEl(seg, i) {
         const segDiv = make("div", { class: "segment" + (seg.__dirty ? " dirty" : "") });
         segDiv.dataset.idx = i;
@@ -469,8 +762,7 @@
         const actions = make("div", { class: "seg-actions" });
         const aiBtn = make("button", {
           class: "seg-action ai-suggest" + (aiEnabled ? "" : " hidden"),
-          title: "Suggest fix with AI",
-          text: "🤖",
+          title: "Suggest fix with AI", text: "🤖",
         });
         aiBtn.dataset.idx = i;
         const seekBtn = make("button", {
@@ -517,7 +809,6 @@
           taList.push(textarea);
         });
         container.appendChild(frag);
-        // Resize textareas now that they're in the DOM
         taList.forEach(autoResize);
       }
 
@@ -539,11 +830,14 @@
       }
 
       // ─── Active segment tracking ─────────────────────────────────────────
+      let trackingStarted = false;
       function startActiveTracking() {
+        if (trackingStarted) return;
+        trackingStarted = true;
         const vid = $("vid");
-        const segs = $("segments");
         let last = -1;
         function tick() {
+          if (!transcript) { requestAnimationFrame(tick); return; }
           const t = vid.currentTime;
           let idx = -1;
           for (let i = 0; i < transcript.length; i++) {
@@ -556,6 +850,7 @@
               const el = document.querySelector('.segment[data-idx="' + idx + '"]');
               if (el) {
                 el.classList.add("active");
+                const segs = $("segments");
                 const rect = el.getBoundingClientRect();
                 const containerRect = segs.getBoundingClientRect();
                 if (rect.top < containerRect.top || rect.bottom > containerRect.bottom) {
@@ -587,17 +882,6 @@
         } catch { return null; }
       }
 
-      function updateStatus() {
-        const st = $("status");
-        if (dirtyCount > 0) {
-          st.textContent = dirtyCount + " edited · " + transcript.length + " total";
-          st.classList.add("dirty");
-        } else {
-          st.textContent = transcript.length + " segments";
-          st.classList.remove("dirty");
-        }
-      }
-
       // ─── Corrections ─────────────────────────────────────────────────────
       $("btn-corrections").onclick = () => openModal("modal-corrections");
       $("apply-corrections").onclick = () => {
@@ -605,7 +889,7 @@
         if (!raw) return;
         let dict;
         try { dict = JSON.parse(raw); }
-        catch (e) { alert("Invalid JSON: " + e.message); return; }
+        catch (e) { toast("Invalid JSON", { type: "error", sub: e.message }); return; }
         const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         let count = 0;
         transcript.forEach((seg, i) => {
@@ -624,7 +908,7 @@
         updateStatus();
         scheduleAutosave();
         closeModal("modal-corrections");
-        $("status").textContent = "Applied corrections to " + count + " segments";
+        toast("Applied corrections", { type: "success", sub: count + " segments changed" });
       };
 
       // ─── Find/replace ────────────────────────────────────────────────────
@@ -648,11 +932,18 @@
         updateStatus();
         scheduleAutosave();
         closeModal("modal-find");
-        $("status").textContent = "Replaced in " + count + " segments";
+        toast("Find/replace done", { type: "success", sub: count + " segments changed" });
       };
 
+      // ─── Help ────────────────────────────────────────────────────────────
+      $("btn-help").onclick = () => openModal("modal-help");
+
+      // ─── Modal helpers ───────────────────────────────────────────────────
       function openModal(id) { $(id).classList.add("open"); }
       function closeModal(id) { $(id).classList.remove("open"); }
+      function closeAllModals() {
+        document.querySelectorAll(".modal.open").forEach((m) => m.classList.remove("open"));
+      }
       document.querySelectorAll("[data-close]").forEach((b) => {
         b.addEventListener("click", () => closeModal(b.dataset.close));
       });
@@ -676,7 +967,8 @@
         lines.push("# Edited via HyperFrames Transcript Editor (webapp)");
         const content = lines.join("\n") + "\n";
 
-        let savedLabel = "Downloaded transcript_review.txt";
+        let toastMsg = "Saved";
+        let toastSub = "Downloaded transcript_review.txt";
 
         if (projectDir) {
           try {
@@ -684,14 +976,18 @@
             const writable = await fileHandle.createWritable();
             await writable.write(content);
             await writable.close();
-            savedLabel = "Saved → " + projectDirName + "transcript_review.txt";
+            toastMsg = "Saved → " + projectDirName + "transcript_review.txt";
+            toastSub = "Reply \"continue\" to your agent — it will re-render.";
           } catch (e) {
-            console.error("Direct save failed, falling back to download:", e);
+            console.error("Direct save failed, falling back:", e);
             downloadBlob(content);
-            savedLabel = "Direct save failed — downloaded instead";
+            toastMsg = "Direct save failed";
+            toastSub = "Downloaded transcript_review.txt instead. Move it into the project folder.";
           }
         } else {
           downloadBlob(content);
+          toastMsg = "Downloaded transcript_review.txt";
+          toastSub = "Drop it into your HyperFrames project folder and reply \"continue\".";
         }
 
         function downloadBlob(text) {
@@ -708,10 +1004,10 @@
         dirtyCount = 0;
         renderSegments();
         updateStatus();
-        $("status").textContent = savedLabel;
+        toast(toastMsg, { type: "success", sub: toastSub, duration: 5000 });
       };
 
-      // ─── WebLLM (optional) ───────────────────────────────────────────────
+      // ─── WebLLM ──────────────────────────────────────────────────────────
       const AI_MODELS = [
         "Qwen2.5-3B-Instruct-q4f16_1-MLC",
         "Llama-3.2-3B-Instruct-q4f16_1-MLC",
@@ -748,11 +1044,13 @@
           aiEnabled = true;
           $("btn-ai").textContent = "✓ AI suggestions ON";
           document.querySelectorAll(".ai-suggest").forEach((b) => b.classList.remove("hidden"));
+          toast("AI suggestions ready", { type: "success", sub: "Click the 🤖 next to any segment to get a fix." });
         } catch (e) {
           console.error(e);
           status.classList.remove("loading");
           status.classList.add("error");
           statusText.textContent = "Failed: " + e.message + " (WebGPU required)";
+          toast("AI load failed", { type: "error", sub: e.message + " — WebGPU required." });
         }
       };
 
@@ -821,17 +1119,48 @@
 
       // ─── Keyboard shortcuts ──────────────────────────────────────────────
       document.addEventListener("keydown", (e) => {
-        if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+        const inField = e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT";
+
+        if (e.key === "Escape") {
+          closeAllModals();
+          return;
+        }
+        if (inField) return;
+
         if (e.code === "Space") {
           e.preventDefault();
           const v = $("vid");
-          v.paused ? v.play() : v.pause();
+          if (v.src) v.paused ? v.play() : v.pause();
         }
-        if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
+        if ((e.metaKey || e.ctrlKey) && e.key === "s") {
           e.preventDefault();
-          $("btn-save").click();
+          if (onEditor) $("btn-save").click();
+        }
+        if ((e.metaKey || e.ctrlKey) && e.key === "o") {
+          e.preventDefault();
+          if (onEditor) $("btn-newproject").click();
+          else $("btn-folder").click();
+        }
+        if ((e.metaKey || e.ctrlKey) && e.key === "f") {
+          e.preventDefault();
+          if (onEditor) $("btn-find").click();
+        }
+        if (e.key === "?") {
+          e.preventDefault();
+          $("btn-help").click();
         }
       });
+
+      // ─── Guard against navigating away with unsaved edits ────────────────
+      window.addEventListener("beforeunload", (e) => {
+        if (dirtyCount > 0) {
+          e.preventDefault();
+          e.returnValue = "";
+        }
+      });
+
+      // ─── Init ────────────────────────────────────────────────────────────
+      updateStatus();
     </script>
   </body>
 </html>
