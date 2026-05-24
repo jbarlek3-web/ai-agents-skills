@@ -21,6 +21,14 @@ import threading
 import webbrowser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
+# Force UTF-8 on Windows so emoji in our log lines don't crash cp1252-encoded
+# stdout when captured by an agent / background task.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+    sys.stderr.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
 # Editor lives at  ../transcript-editor/index.html  (relative to this script).
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 SKILL_DIR = os.path.dirname(SCRIPT_DIR)
