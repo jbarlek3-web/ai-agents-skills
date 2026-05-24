@@ -488,6 +488,7 @@
       let projectDir = null;     // FileSystemDirectoryHandle when picked via folder picker
       let projectDirName = "";   // Display name (e.g. "heb-showcase/")
       let onEditor = false;      // true once openEditor() has run
+      let serverMode = false;    // true when loaded from serve_review.py (Approve & Render)
       const STORAGE_KEY = "hyperframes_transcript_edit_v1";
 
       const $ = (id) => document.getElementById(id);
@@ -967,6 +968,37 @@
         lines.push("# Edited via HyperFrames Transcript Editor (webapp)");
         const content = lines.join("\n") + "\n";
 
+        // ─── Server mode: POST to /approve and signal the agent ──────────
+        if (serverMode) {
+          const btn = $("btn-save");
+          btn.disabled = true;
+          btn.textContent = "Approving…";
+          try {
+            const r = await fetch("/approve", {
+              method: "POST",
+              headers: { "Content-Type": "text/plain; charset=utf-8" },
+              body: content,
+            });
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            transcript.forEach((s) => { delete s.__dirty; });
+            dirtyCount = 0;
+            renderSegments();
+            updateStatus();
+            btn.textContent = "✓ APPROVED — RENDERING";
+            btn.style.opacity = "0.7";
+            toast("✓ Approved", {
+              type: "success",
+              sub: "Your agent is rendering now. You can close this tab.",
+              duration: 15000,
+            });
+          } catch (e) {
+            btn.disabled = false;
+            btn.textContent = "✓ APPROVE & RENDER";
+            toast("Approval failed", { type: "error", sub: e.message + " — try again." });
+          }
+          return;
+        }
+
         let toastMsg = "Saved";
         let toastSub = "Downloaded transcript_review.txt";
 
@@ -1158,6 +1190,50 @@
           e.returnValue = "";
         }
       });
+
+      // ─── Server-mode auto-load (when served by serve_review.py) ─────────
+      (async function detectServerMode() {
+        try {
+          const r = await fetch("/api/project", { cache: "no-store" });
+          if (!r.ok) return;
+          const data = await r.json();
+          if (!data || !data.serverMode || !Array.isArray(data.transcript)) return;
+
+          transcript = data.transcript;
+          videoUrl = data.videoUrl || "/video";
+          projectDirName = data.projectName ? data.projectName + "/" : "";
+          serverMode = true;
+
+          // Hide upload screen, jump straight in
+          $("upload").classList.add("hidden");
+          $("editor").classList.remove("hidden");
+          $("vid").src = videoUrl;
+          renderSegments();
+          startActiveTracking();
+          document.querySelectorAll(".nav-only").forEach((el) => el.classList.remove("hidden"));
+          if (projectDirName) {
+            $("project-chip").classList.remove("hidden");
+            $("project-chip-text").textContent = "🚀 " + projectDirName + "(server mode)";
+          }
+          onEditor = true;
+
+          // Repurpose the save button as the Approve action
+          $("btn-save").textContent = "✓ APPROVE & RENDER";
+
+          // Disable the "open another project" button — we're locked to this one
+          $("btn-newproject").classList.add("hidden");
+          $("btn-home").classList.add("hidden");
+
+          updateStatus();
+          toast("Connected to review server", {
+            type: "success",
+            sub: data.transcript.length + " segments • click Approve & Render when done",
+            duration: 5000,
+          });
+        } catch (_) {
+          // Not in server mode — proceed with the normal upload screen.
+        }
+      })();
 
       // ─── Init ────────────────────────────────────────────────────────────
       updateStatus();

@@ -20,22 +20,36 @@ End-to-end captioned video editor on top of HyperFrames. The user gives you a vi
 3. **Extract audio** — `ffmpeg -i source.mp4 -vn -ac 1 -ar 16000 audio.wav`.
 4. **Transcribe** — copy `references/transcribe.py` into the project. Default model `large-v3` (best Hebrew). CUDA usually fails on Windows (missing cuDNN); the script falls back to CPU int8. Force `language="he"` for Hebrew, `language="en"` for English; otherwise auto-detect.
 5. **Apply known corrections** — copy `references/corrections-hebrew.md` content into a `corrections.json` at the project root (keys = wrong token, values = correct token).
-6. 🛑 **STOP — open the transcript editor and ask the user to review.** Copy `references/make_review.py` into the project and run `python make_review.py`. It applies `corrections.json` to transcript.json AND emits the human-editable `transcript_review.txt`.
-   Then **launch the interactive editor**:
+6. 🛑 **STOP — start the review server and let the user approve in a webapp.**
+   First apply known corrections: copy `references/make_review.py` into the project and run
+   `python make_review.py`. It applies `corrections.json` to `transcript.json`.
+
+   Then spawn the review server **as a background task** (it blocks until the user clicks
+   "Approve & Render" in the browser):
    ```bash
-   start "" "C:\Users\User\.claude\skills\video-edit\transcript-editor\index.html"   # Windows
-   open  "$HOME/.claude/skills/video-edit/transcript-editor/index.html"               # macOS
+   python "$HOME/.claude/skills/video-edit/references/serve_review.py" .
+   # On Windows: python "C:\Users\<you>\.claude\skills\video-edit\references\serve_review.py" .
    ```
-   Tell the user to load their `transcript.json` and source video into the editor, fix
-   mishears (optional: enable WebLLM for AI suggestions), and save the new
-   `transcript_review.txt` back into the project root. Send them the prompt from
-   `references/transcript-review-workflow.md`. The editor offers a far better experience
-   than Notepad — video-synced segment preview, RTL-aware editing, one-click
-   dictionary apply, and optional in-browser LLM suggestions for Hebrew/English mishears.
-   Do NOT proceed until they reply "continue" / "render it".
-   When the user replies "continue": copy `references/apply_review.py` and run
-   `python apply_review.py`. It re-tokenises edited lines and redistributes word timings
-   back into `transcript.json` so caption sync still works.
+   The server prints a line like `REVIEW_URL=http://localhost:PORT/`. Grab that URL from
+   the background-task output (or read stdout) and send the user:
+
+   > 👉 Review your transcript here: **http://localhost:PORT/**
+   > When you click **Approve & Render**, I'll continue automatically.
+
+   The agent **does not need a "continue" message** — when the user clicks the button, the
+   server writes `transcript_review.txt` to the project dir AND exits with code 0. The
+   agent's background-task notification fires, and the pipeline resumes from step 8.
+
+   **Fallback if no browser / no server**: open the editor as a static file
+   (`start "" "$HOME/.claude/skills/video-edit/transcript-editor/index.html"`),
+   ask the user to pick the project folder, edit, save `transcript_review.txt` back into
+   the project, and reply "continue". The editor supports both modes.
+
+7. **(Optional) Background removal** — see step 7 below; can run in parallel with the user's
+   review.
+
+8. After approval, run `python references/apply_review.py`. It re-tokenises edited lines and
+   redistributes word timings back into `transcript.json` so caption sync still works.
 7. **(Optional) Background removal** — if any talking-head segment needs behind-subject text, extract the segment as `outro.mp4` (or `intro.mp4`) and run `npx hyperframes remove-background <clip>.mp4 -o <name>_subject.webm --quality best`. CPU only on most setups (~3–8 min for a ~15s 1440p clip).
 8. **Re-encode source with dense keyframes** — multi-worker render seeks freeze on sparse keyframes. Always run:
    ```bash
@@ -69,7 +83,8 @@ End-to-end captioned video editor on top of HyperFrames. The user gives you a vi
 | `transcript-editor/index.html` | **Interactive browser editor** — video preview, RTL editing, dictionary apply, optional WebLLM AI suggestions, saves `transcript_review.txt` |
 | `references/setup.md` | Prerequisites + install commands for Node / Python / FFmpeg / faster-whisper |
 | `references/transcribe.py` | faster-whisper transcribe with CPU fallback + word timestamps |
-| `references/make_review.py` | Apply corrections + emit `transcript_review.txt` for the user to edit |
+| `references/serve_review.py` | **Local review server** — auto-loads editor, blocks until user clicks Approve & Render, then writes `transcript_review.txt` and exits (signals the agent) |
+| `references/make_review.py` | Apply corrections + emit `transcript_review.txt` (file-mode fallback) |
 | `references/apply_review.py` | Parse edited review file, redistribute word timings, update `transcript.json` |
 | `references/gen_body.py` | Caption-body generator (editorial + matrix in liquid-glass pills) |
 | `references/host-template.html` | Full host composition with liquid effects + transition wipe |
