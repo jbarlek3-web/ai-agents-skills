@@ -126,6 +126,139 @@ approve the transcript. That's it.
 
 ---
 
+## End-to-end: from raw video to ready-to-post (10 steps)
+
+The complete recipe a new user follows. The agent does all the heavy lifting — you do
+exactly two things: (1) review the transcript, (2) optionally pick styles per segment.
+
+### 1. Install once
+
+Mac / Linux:
+```bash
+curl -sSL https://raw.githubusercontent.com/hoodini/ai-agents-skills/master/install.sh | bash
+```
+
+Windows (PowerShell):
+```powershell
+winget install OpenJS.NodeJS.LTS Python.Python.3.12 Gyan.FFmpeg
+pip install faster-whisper
+npm install -g hyperframes
+git clone https://github.com/hoodini/ai-agents-skills "$HOME/.claude/skills-src"
+robocopy "$HOME/.claude/skills-src/skills/video-edit" "$HOME/.claude/skills/video-edit" /E
+```
+
+### 2. Drop your video on the agent
+
+In Claude Code (or any agent that supports the agent-skill standard):
+
+```
+edit this video: C:\path\to\my-talk.mp4
+```
+
+For vertical (TikTok / Reels / Shorts) from a 16:9 source, add:
+```
+…and make it vertical for TikTok
+```
+
+The agent says "got it" and starts running. No menus, no presets.
+
+### 3. Wait for the review URL (1–10 min depending on length)
+
+The agent runs `ffprobe` → extracts audio → transcribes (`faster-whisper large-v3`) →
+applies known mishear corrections → spawns the local review server.
+
+When transcription finishes you'll see a message like:
+
+> 👉 Review your transcript here: **http://localhost:54287/**
+> Click "Approve & Render" when done — I'll continue automatically.
+
+### 4. Open the URL — the editor auto-loads your project
+
+The transcript editor opens with:
+- Your transcript on the right, each segment on its own line
+- The source video on the left, playing in sync
+- A 🎨 chip under every segment for picking caption style
+- A `✓ APPROVE & RENDER` button at the top right
+
+### 5. Fix any mishears
+
+Click a segment, edit the text. Whisper mishears the Hebrew word
+*הלעיסה* as *על עיסה*, *קלוד* as *קלוט*, etc. You fix them inline.
+
+Optional: toggle the **AI** button (top bar) to enable WebLLM (~1.5 GB Qwen 2.5-3B
+downloads to your browser cache once). Each segment then gets a 🤖 button — click it
+to get a context-aware fix suggestion. Accept or dismiss inline.
+
+### 6. (Optional) Assign a caption style per segment
+
+Click the 🎨 chip below any segment. A modal opens with **15 caption styles** in a
+3-column grid. **Hover any card to play its preview** — every style has a working
+video preview (4 from the official HyperFrames catalog, 11 bundled locally as
+~50 KB MP4s).
+
+Pick what fits the moment. Examples:
+- **Editorial Emphasis** — for normal talking-head segments
+- **Matrix Decode** — for tech / hacking vibes
+- **Kinetic Slam** — for high-energy hooks
+- **Neon Glow** — for product reveals
+- **Stamp Impact** — for punch-line moments
+- **Highlight Marker** — for "here's the key point" callouts
+- **Soft Fade** — for quiet emotional beats
+- **Auto** (default) — alternates Editorial + Matrix automatically
+
+Each pick saves a sidecar `caption_styles.json` next to your transcript. If you don't
+pick anything, the default Auto-rotate still ships beautiful captions.
+
+### 7. Click ✓ APPROVE & RENDER
+
+That single click:
+1. POSTs your edited transcript to the local server
+2. Server writes `transcript_review.txt` + `caption_styles.json` next to your video
+3. Server exits cleanly
+4. Your agent's background task receives the exit code and resumes automatically
+
+You don't need to type "continue" or move any files. Walk away.
+
+### 8. Agent renders the video (3–15 min depending on length)
+
+The agent:
+- Re-tokenises and redistributes word timings across your edits
+- Regenerates the caption sub-composition with your per-segment style picks
+- Lints the HyperFrames composition
+- Renders the final MP4 (standard quality, h264 + AAC)
+
+For both 16:9 and 9:16: the same review applies — two parallel renders.
+
+### 9. Get the file
+
+Output lives in `renders/<project-name>_FINAL.mp4` (or whatever filename the agent
+chose). The agent opens it in your default player when done.
+
+### 10. Post
+
+- **TikTok / Instagram Reels / YouTube Shorts**: upload the 1080×1920 file directly
+- **YouTube / X / LinkedIn**: upload the 1920×1080 file directly
+
+No re-encoding needed — both renders are already `yuv420p` h264 + AAC, faststart-flagged
+for instant streaming.
+
+### What if you just want to fix captions on a project you already have?
+
+Skip the agent entirely. Open the editor as a static file:
+
+```bash
+# Mac / Linux
+open ~/.claude/skills/video-edit/transcript-editor/index.html
+# Windows
+start "" "%USERPROFILE%\.claude\skills\video-edit\transcript-editor\index.html"
+```
+
+Drop your HyperFrames project folder onto the upload screen → edit → click Save. It
+writes `transcript_review.txt` back into the folder. Tell your agent "continue" — or
+run `python apply_review.py && python gen_body.py && npm run render` manually.
+
+---
+
 ## The editor
 
 Open it directly without an agent at all:
@@ -276,17 +409,37 @@ All three were rendered end-to-end from the same agent skill with no manual scri
 
 ## Roadmap
 
-- [ ] **Per-segment caption-style picker** — in the editor, click a segment's style chip,
-  pick from the 15 HyperFrames caption styles, see a live preview video. Save sidecars
-  `caption_styles.json`. Renderer concatenates per-style sub-compositions on one track.
-- [ ] **Style-preview grid** — modal showing autoplaying `.mp4` previews for all 15 styles
-  pulled from `static.heygen.ai`.
+### Done — May 2026
+
+- [x] **Per-segment caption-style picker** — every segment has a 🎨 chip that opens a
+  3-column modal with all 15 HyperFrames styles. Click to assign, saves to
+  `caption_styles.json` sidecar + inline `::style=<id>` markers in `transcript_review.txt`.
+  Round-trips through `apply_review.py` → `gen_body.py`.
+- [x] **Style-preview grid** — every style card has a working video preview. 4 use the
+  official HyperFrames catalog on heygen CDN, 11 ship as ~50 KB local clips under
+  `transcript-editor/previews/`. Hover any card to play.
+- [x] **Render adapters for all 15 styles** — 13 render natively in the body pill
+  (editorial-emphasis, matrix-decode, typewriter, neon-glow, split-reveal, mask-wipe,
+  marquee-rail, stamp-impact, liquid-fill, glitch-rgb, soft-fade, bold-underline,
+  highlight-marker). 2 stay external (kinetic-slam, parallax-layers) and get their own
+  sub-composition slots in the host.
+- [x] **Vertical 9:16 support** — host-template-vertical.html + gen_body_vertical.py
+  produce a 1080×1920 render from the same 16:9 source. TikTok / Reels / Shorts ready.
+- [x] **Aggressive VAD transcription** — VAD min_silence=400ms + segment-length cap of 6s
+  brings word-timing accuracy from ±1.5s drift to ±100ms.
+
+### Still ahead
+
 - [ ] **Multi-language Whisper corrections** — auto-load `corrections-<lang>.json` based on
-  detected language.
+  detected language (currently Hebrew-only).
 - [ ] **Hosted demo** — deploy the editor as a public static URL (Vercel) so anyone can try
-  it without installing.
+  the picker without installing anything.
 - [ ] **Background-removal preview** — show the alpha-cutout in the editor so you know
   which segments will use parallax-behind treatment.
+- [ ] **Forced alignment fallback** — when Whisper word timestamps still drift on
+  ultra-long takes, optional whisperX integration for ±20ms accuracy.
+- [ ] **Save & resume mid-pick** — picker state persists if you reload the editor
+  mid-session.
 
 ---
 
