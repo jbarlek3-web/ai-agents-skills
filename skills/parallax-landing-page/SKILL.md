@@ -7,7 +7,7 @@ description: Build a scroll-driven cinematic landing page from a short video. Th
 
 Turn a short video into a one-screen cinematic landing page where the user's scroll gesture scrubs through the video frame-by-frame while five dramatic text scenes crossfade in and out. The document never actually scrolls — wheel/touch/keyboard input is intercepted in JS and converted into virtual frame progress.
 
-This skill encodes the patterns proven in the reference repo at `C:\Users\User\Documents\parasites\` (the github / lion / hope landings). Treat that repo as the ground truth if anything here is ambiguous.
+This skill encodes the patterns proven in the bundled reference at [`../../examples/parasites/`](../../examples/parasites/) (the github / lion / hope landings — three working pages built with this exact skill). Treat that folder as the ground truth if anything here is ambiguous.
 
 ## What you're building
 
@@ -33,7 +33,7 @@ Confirm with the user:
 1. **Video path** — where the source MP4 lives.
 2. **Slug** — short folder/file name (e.g. `hope`, `marcus`, `desk`). One word, lowercase, no spaces. This becomes both the frame folder name (`<slug>/`) and the HTML filename (`<slug>.html`).
 3. **Theme / topic** — what is this landing about? A product launch? A personal moment? A wildlife encounter? You need this to write the copy.
-4. **Project mode** — standalone (brand new folder) or integrate into the existing parasites showcase at `C:\Users\User\Documents\parasites\`. If the user says "add it to the showcase", they mean Mode B below.
+4. **Project mode** — standalone (brand new folder) or integrate into the existing parasites showcase at `examples/parasites/` (top of this repo). If the user says "add it to the showcase", they mean Mode B below.
 5. **Accent color** — for the script/CTA highlight: `gold` (#f5b042), `amber` (#ff8a3d), `accent` (pink #ff4d6d), `cream` (#f5e9d4), or something new (add it to `:root` in style.css and write a new `.script.<name>` rule).
 
 If the user hasn't specified some of these, propose defaults and move on — don't stall on questions they can answer once they see the result.
@@ -143,7 +143,7 @@ These are baked into the reference and break the experience if violated:
 
 ## Where to look when you get stuck
 
-- The reference repo: `C:\Users\User\Documents\parasites\` — github.html, lion.html, hope.html, style.css, parallax.js, index.html. If your output diverges visibly from those, you've drifted; reread.
+- The reference showcase bundled in this repo: [`examples/parasites/`](../../examples/parasites/) — github.html, lion.html, hope.html, style.css, parallax.js, index.html. If your output diverges visibly from those, you've drifted; reread.
 - `references/copy-guide.md` — how to write the 5 scenes so they actually feel cinematic.
 - `references/showcase-integration.md` — exact edits needed when adding to an existing hub.
 - `assets/landing-page-template.html` — the canonical structure with placeholders.

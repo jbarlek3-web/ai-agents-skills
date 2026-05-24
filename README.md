@@ -39,6 +39,15 @@ holds the CTAs (no separate end section). Built on the proven `parasites/` refer
 python skills/parallax-landing-page/scripts/extract_frames.py demo.mp4 ./out/demo
 ```
 
+🎬 **See it live:** the three landing pages built with this skill ship in
+[`examples/parasites/`](examples/parasites/) — GitHub Desktop, Marcus the white lion,
+and Hope the cheetah. After cloning:
+
+```bash
+cd examples/parasites && python -m http.server 8000
+# open http://localhost:8000/
+```
+
 > Note: distinct from `video-to-landing-page` (which uses an evenly-spaced
 > scroll-listener approach). This skill is the "Apple AirPods Pro" variant — every frame,
 > locked body, dramatic typography, narrative beats.
