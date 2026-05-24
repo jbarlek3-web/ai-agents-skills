@@ -1,9 +1,17 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────
 # YUV.AI Skills · One-shot installer for any machine
-# Sets up the full stack: yuv-decks, yuv-viral-video, yuv-design-system, video-use,
-# hyperframes (+ 4 companion skills), Python venvs, hyperframes CLI,
-# system deps (ffmpeg/node/uv), and the shared ElevenLabs API key.
+# Sets up the FULL creative stack:
+#   Design       — yuv-design-system
+#   Decks        — yuv-decks
+#   Videos       — yuv-viral-video, video-edit, video-to-landing-page,
+#                  parallax-landing-page, video-use
+#   Video engine — hyperframes, hyperframes-cli, hyperframes-registry,
+#                  gsap, website-to-hyperframes
+#   AI images    — nano-banana-pro
+#   Diagrams     — mermaid-diagrams
+# Plus: Python venvs, hyperframes CLI, faster-whisper, system deps
+#       (ffmpeg/node/uv), and the shared ElevenLabs API key.
 #
 # Usage on a fresh machine:
 #   curl -sSL https://raw.githubusercontent.com/hoodini/ai-agents-skills/master/install.sh | bash
@@ -149,11 +157,12 @@ mkdir -p "$HOME/Developer"
 ok "$HOME/.claude/skills"
 ok "$HOME/Developer"
 
-# ─── 1. yuv-decks + yuv-viral-video + yuv-design-system + video-edit + video-to-landing-page ──
-step "Installing yuv-decks, yuv-viral-video, yuv-design-system, video-edit, video-to-landing-page"
+# ─── 1. Core creative stack from ai-agents-skills ─────────────
+#       (yuv-* skills + video-* skills + nano-banana-pro + parallax-landing-page + mermaid-diagrams)
+step "Installing the full YUV creative stack from ai-agents-skills"
 
 CLONE_TMP="$(mktemp -d)/ai-agents-skills"
-# Note: yuv-design-system has bundled binary brand assets — needs full blob fetch (no --filter=blob:none for this clone)
+# Note: yuv-design-system + parallax-landing-page have bundled binary assets — needs full blob fetch (no --filter=blob:none)
 git clone --depth 1 --sparse \
   https://github.com/hoodini/ai-agents-skills "$CLONE_TMP" >/dev/null 2>&1
 ( cd "$CLONE_TMP" && git sparse-checkout set \
@@ -161,9 +170,12 @@ git clone --depth 1 --sparse \
     skills/yuv-viral-video \
     skills/yuv-design-system \
     skills/video-edit \
-    skills/video-to-landing-page >/dev/null 2>&1 )
+    skills/video-to-landing-page \
+    skills/parallax-landing-page \
+    skills/nano-banana-pro \
+    skills/mermaid-diagrams >/dev/null 2>&1 )
 
-for skill in yuv-decks yuv-viral-video yuv-design-system video-edit video-to-landing-page; do
+for skill in yuv-decks yuv-viral-video yuv-design-system video-edit video-to-landing-page parallax-landing-page nano-banana-pro mermaid-diagrams; do
   if [ -d "$HOME/.claude/skills/$skill" ]; then
     info "$skill already exists — refreshing"
     rm -rf "$HOME/.claude/skills/$skill"
@@ -300,7 +312,7 @@ INSTALLED_SKILLS=$(ls "$HOME/.claude/skills" | tr '\n' ' ')
 ok "Installed skills: $INSTALLED_SKILLS"
 
 ALL_GOOD=1
-for skill in yuv-decks yuv-viral-video yuv-design-system video-edit video-to-landing-page video-use hyperframes hyperframes-cli gsap website-to-hyperframes; do
+for skill in yuv-decks yuv-viral-video yuv-design-system video-edit video-to-landing-page parallax-landing-page nano-banana-pro mermaid-diagrams video-use hyperframes hyperframes-cli hyperframes-registry gsap website-to-hyperframes; do
   if [ -e "$HOME/.claude/skills/$skill" ]; then
     ok "$skill"
   else
