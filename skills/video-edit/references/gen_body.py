@@ -1,12 +1,54 @@
 # Hebrew body caption generator — generates compositions/components/caption-body.html
 # from transcript.json. RTL Hebrew with liquid-glass pills, rotating editorial/matrix.
 # Shifted right of frame center to clear the bottom-LEFT webcam PiP in this video.
-import json, re, io
+#
+# Per-segment style overrides:
+#   If caption_styles.json exists, segments listed there override the rotating
+#   style. The body sub-comp natively renders only two styles —
+#   editorial-emphasis ("ed") and matrix-decode ("mx"). Other supported styles
+#   (kinetic-slam / parallax-layers) live in separate sub-compositions and have
+#   to be wired into index.html by the agent; this generator logs them so the
+#   agent knows what to add.
+import json, os, re, io
 
 BODY_START = 0.0          # body pill captions span the entire speech (including the outro head)
 BODY_END_GUESS = 179.5
 RUN_LEN = 3               # groups per style run
 MAX_WORDS = 4
+
+# Mapping from picker style ids → body sub-comp internal id.
+BODY_NATIVE = {
+    "editorial-emphasis": "ed",
+    "matrix-decode": "mx",
+}
+# Styles that have their own sub-compositions (rendered by the host, not the
+# body pill). When the user picks one of these, we *suppress* the body pill
+# for that segment so the dedicated sub-comp can carry the moment without
+# clashing.
+EXTERNAL_STYLES = {"kinetic-slam", "parallax-layers"}
+
+
+def load_style_overrides():
+    """Return {segment_index (int): style_id (str)} from caption_styles.json."""
+    path = "caption_styles.json"
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path, encoding="utf-8") as f:
+            doc = json.load(f)
+    except Exception as exc:
+        print(f"WARN: caption_styles.json unreadable ({exc}) — ignoring.")
+        return {}
+    out = {}
+    for k, v in (doc.get("assignments") or {}).items():
+        try:
+            out[int(k)] = (v or {}).get("style")
+        except (ValueError, TypeError):
+            continue
+    return {k: v for k, v in out.items() if v}
+
+
+STYLE_OVERRIDES = load_style_overrides()
 
 # Hebrew corrections — fix common Whisper mishears (especially the Claude brand).
 CORRECTIONS = {
@@ -89,30 +131,73 @@ def build():
         raise SystemExit("no words in body range — check transcript")
     groups = group_words(words)
     data = []
+    external = []   # groups that should be rendered by an external sub-comp
     for gi, g in enumerate(groups):
-        style = "ed" if (gi // RUN_LEN) % 2 == 0 else "mx"
+        # Default: rotate ed/mx in runs of RUN_LEN
+        default_style = "ed" if (gi // RUN_LEN) % 2 == 0 else "mx"
+        # Look up override by dominant segment index (first word's segment).
+        seg_idx = g[0]["seg"]
+        override = STYLE_OVERRIDES.get(seg_idx)
+        skip_pill = False
+        if override:
+            if override in BODY_NATIVE:
+                style = BODY_NATIVE[override]
+            elif override in EXTERNAL_STYLES:
+                style = default_style
+                skip_pill = True
+            else:
+                # Unknown / "soon" — fall back, but record so the agent can log it.
+                style = default_style
+        else:
+            style = default_style
+
         ei = emph_index(g) if style == "ed" else -1
         s = round(g[0]["s"] - BODY_START - 0.05, 3)
         if s < 0:
             s = 0.0
-        data.append(
-            {
-                "s": s,
-                "raw_e": round(g[-1]["e"] - BODY_START, 3),
-                "st": style,
-                "words": [{"t": w["t"], "emph": (i == ei)} for i, w in enumerate(g)],
-            }
-        )
+        entry = {
+            "s": s,
+            "raw_e": round(g[-1]["e"] - BODY_START, 3),
+            "st": style,
+            "seg": seg_idx,
+            "ovr": override or None,
+            "words": [{"t": w["t"], "emph": (i == ei)} for i, w in enumerate(g)],
+        }
+        if skip_pill:
+            external.append({
+                "seg": seg_idx,
+                "style": override,
+                "start": s,
+                "end": entry["raw_e"],
+                "text": " ".join(w["t"] for w in g),
+            })
+            continue                    # do NOT add to body pill data
+        data.append(entry)
     for i, d in enumerate(data):
         d["e"] = data[i + 1]["s"] if i + 1 < len(data) else round(d["raw_e"] + 0.6, 3)
         del d["raw_e"]
     duration = round(data[-1]["e"] + 0.15, 2)
-    return data, duration
+    return data, duration, external
 
 
-DATA, DURATION = build()
+DATA, DURATION, EXTERNAL_GROUPS = build()
 ed = sum(1 for d in DATA if d["st"] == "ed")
-print(f"{len(DATA)} body groups ({ed} editorial / {len(DATA)-ed} matrix), duration {DURATION}s")
+mx = sum(1 for d in DATA if d["st"] == "mx")
+ovr = sum(1 for d in DATA if d.get("ovr"))
+print(f"{len(DATA)} body groups ({ed} editorial / {mx} matrix), duration {DURATION}s")
+if STYLE_OVERRIDES:
+    print(f"applied {ovr} per-segment style override(s) to body pills")
+if EXTERNAL_GROUPS:
+    print(f"{len(EXTERNAL_GROUPS)} segment(s) marked for external sub-comps "
+          "(skipped in body pill — agent must wire dedicated compositions):")
+    for x in EXTERNAL_GROUPS:
+        print(f"  [seg {x['seg']}] {x['style']} @ {x['start']:.2f}-{x['end']:.2f}s: {x['text'][:60]}")
+    # Also drop a JSON sidecar so a render adapter can pick it up.
+    try:
+        with open("caption_external.json", "w", encoding="utf-8") as f:
+            json.dump({"groups": EXTERNAL_GROUPS}, f, ensure_ascii=False, indent=2)
+    except Exception as exc:
+        print(f"WARN: could not write caption_external.json: {exc}")
 
 DATA_JSON = json.dumps(DATA, ensure_ascii=False, separators=(",", ":"))
 

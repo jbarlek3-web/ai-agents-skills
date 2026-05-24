@@ -1,5 +1,9 @@
 """Apply the user's edited transcript_review.txt back into transcript.json.
 
+Inline ``::style=<id>`` markers (written by the transcript-editor webapp's
+style picker) are also parsed and mirrored into ``caption_styles.json`` so
+``gen_body.py`` can pick them up.
+
 Parses each `[mm:ss.xx] text` line, matches it to the corresponding segment in
 transcript.json by start time, re-tokenises the new text, and redistributes the
 original word timings to the new tokens by sequential position + character weight.
@@ -63,7 +67,9 @@ def main():
         review = f.read()
 
     # Parse the [mm:ss.xx] text lines (ignore # comments + blanks).
+    # Inline style markers may appear at end of line as `  ::style=<id>`.
     pattern = re.compile(r"^\[([0-9:.]+)\]\s*(.+?)\s*$")
+    style_marker = re.compile(r"\s*::style=([a-z0-9_-]+)\s*$")
     edited = []
     for line in review.splitlines():
         line = line.rstrip()
@@ -72,7 +78,13 @@ def main():
         m = pattern.match(line)
         if not m:
             continue
-        edited.append({"start": parse_time(m.group(1)), "text": m.group(2)})
+        body = m.group(2)
+        style = None
+        sm = style_marker.search(body)
+        if sm:
+            style = sm.group(1)
+            body = body[: sm.start()].rstrip()
+        edited.append({"start": parse_time(m.group(1)), "text": body, "style": style})
 
     if not edited:
         print("ERROR: no [mm:ss.xx] lines found in review file", file=sys.stderr)
@@ -83,6 +95,8 @@ def main():
 
     # Match edited lines to segments by closest start time.
     changes = 0
+    style_count = 0
+    inline_assignments = {}
     for ed in edited:
         # Find segment with closest start.
         best = min(data, key=lambda s: abs(s["start"] - ed["start"]))
@@ -93,11 +107,41 @@ def main():
             changes += 1
         best["text"] = ed["text"]
         best["words"] = redistribute_words(ed["text"], best["words"])
+        if ed["style"]:
+            best["style"] = ed["style"]
+            style_count += 1
+            inline_assignments[str(data.index(best))] = {
+                "start": best["start"],
+                "style": ed["style"],
+            }
+        elif "style" in best:
+            # User reset to auto by removing the marker
+            del best["style"]
 
     with open(tpath, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
 
+    # If inline markers were used, mirror them into caption_styles.json so
+    # gen_body.py only has to read one place. Don't clobber an existing sidecar
+    # that already has more detail — merge instead.
+    styles_path = os.path.join(proj_dir, "caption_styles.json")
+    sidecar = {"version": 1, "assignments": {}}
+    if os.path.exists(styles_path):
+        try:
+            with open(styles_path, "r", encoding="utf-8") as f:
+                sidecar = json.load(f)
+            if not isinstance(sidecar.get("assignments"), dict):
+                sidecar["assignments"] = {}
+        except Exception:
+            sidecar = {"version": 1, "assignments": {}}
+    sidecar["assignments"].update(inline_assignments)
+    if inline_assignments or os.path.exists(styles_path):
+        with open(styles_path, "w", encoding="utf-8") as f:
+            json.dump(sidecar, f, ensure_ascii=False, indent=2)
+
     print(f"applied {changes} edits to {tpath}")
+    if style_count:
+        print(f"applied {style_count} caption-style override(s) -> caption_styles.json")
     print(f"{len(data)} segments, {sum(len(s['words']) for s in data)} words")
     print("\nNext: re-run gen_body.py and render.")
 

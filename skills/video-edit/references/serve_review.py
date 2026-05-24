@@ -157,6 +157,23 @@ class ReviewHandler(BaseHTTPRequestHandler):
             self.send_header("Cache-Control", "no-store")
             self.end_headers()
             self.wfile.write(body)
+        elif self.path == "/api/caption-styles":
+            styles_path = os.path.join(self.project_dir, "caption_styles.json")
+            if not os.path.exists(styles_path):
+                self._json(404, {"ok": False, "error": "no caption_styles.json"})
+                return
+            try:
+                with open(styles_path, encoding="utf-8") as f:
+                    data = json.load(f)
+                body = json.dumps(data, ensure_ascii=False).encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                self.wfile.write(body)
+            except Exception as exc:
+                self._json(500, {"ok": False, "error": str(exc)})
         else:
             self.send_response(404)
             self.end_headers()
@@ -180,6 +197,20 @@ class ReviewHandler(BaseHTTPRequestHandler):
                 pass
             # Signal the main thread to shut the server down + exit 0.
             self.approved_event.set()
+        elif self.path == "/api/caption-styles":
+            length = int(self.headers.get("Content-Length", 0))
+            raw = self.rfile.read(length).decode("utf-8", errors="replace")
+            try:
+                # Validate JSON
+                data = json.loads(raw) if raw.strip() else {"assignments": {}}
+                if not isinstance(data, dict):
+                    raise ValueError("expected an object")
+                out = os.path.join(self.project_dir, "caption_styles.json")
+                with open(out, "w", encoding="utf-8", newline="\n") as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+                self._json(200, {"ok": True, "path": out})
+            except Exception as exc:
+                self._json(400, {"ok": False, "error": str(exc)})
         else:
             self.send_response(404)
             self.end_headers()
