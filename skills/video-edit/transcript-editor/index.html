@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HyperFrames Transcript Editor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rubik:wght@500;700&family=Anton&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0a12;
+        --panel: #14141c;
+        --panel-2: #1d1d28;
+        --line: #2a2a38;
+        --ink: #f5f0d0;
+        --muted: #8a8a98;
+        --pink: #ff3da6;
+        --yellow: #ffd24a;
+        --green: #00ff8a;
+        --red: #ff5d8f;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Inter", sans-serif;
+        height: 100%;
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+      }
+      header {
+        height: 56px;
+        border-bottom: 1px solid var(--line);
+        display: flex; align-items: center;
+        padding: 0 24px; gap: 24px;
+        background: var(--panel);
+      }
+      header h1 {
+        font-family: "Anton", sans-serif;
+        font-size: 22px; letter-spacing: 0.04em; color: var(--pink);
+      }
+      header .status { margin-left: auto; font-size: 13px; color: var(--muted); }
+      header .status.dirty { color: var(--yellow); }
+
+      .upload {
+        display: flex; align-items: center; justify-content: center;
+        height: calc(100vh - 56px); flex-direction: column;
+        gap: 28px; padding: 40px;
+      }
+      .upload h2 {
+        font-family: "Anton", sans-serif;
+        font-size: 56px; color: var(--yellow); letter-spacing: 0.02em;
+      }
+      .upload p { color: var(--muted); font-size: 16px; text-align: center; max-width: 60ch; }
+      .file-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+      .file-btn {
+        padding: 14px 28px; background: var(--panel); border: 1px solid var(--line);
+        color: var(--ink); font-family: "Inter", sans-serif; font-size: 14px; font-weight: 600;
+        cursor: pointer; display: flex; align-items: center; gap: 10px;
+      }
+      .file-btn input { display: none; }
+      .file-btn:hover { border-color: var(--pink); }
+      .file-btn.ready { border-color: var(--green); color: var(--green); }
+      .file-btn .check { display: none; }
+      .file-btn.ready .check { display: inline; }
+      .start-btn {
+        padding: 16px 40px; background: var(--pink); color: var(--bg);
+        border: 0; font-family: "Anton", sans-serif; font-size: 20px;
+        letter-spacing: 0.06em; cursor: pointer; opacity: 0.4;
+        pointer-events: none; text-transform: uppercase;
+      }
+      .start-btn.ready { opacity: 1; pointer-events: auto; }
+
+      .editor { display: grid; grid-template-columns: 1fr 480px; height: calc(100vh - 56px); }
+      .segments { overflow-y: auto; padding: 20px; }
+      .segment {
+        padding: 12px 16px; margin-bottom: 8px; border: 1px solid var(--line);
+        background: var(--panel); cursor: pointer;
+        display: grid; grid-template-columns: 76px 1fr 40px;
+        gap: 12px; align-items: start;
+        transition: border-color 0.15s, background 0.15s;
+      }
+      .segment:hover { background: var(--panel-2); }
+      .segment.active { border-color: var(--pink); background: var(--panel-2); }
+      .segment.dirty { border-left: 3px solid var(--yellow); padding-left: 14px; }
+      .seg-time {
+        color: var(--muted); font-size: 12px;
+        font-family: "JetBrains Mono", "Courier New", monospace; padding-top: 6px;
+      }
+      .seg-text {
+        background: transparent; color: var(--ink);
+        font-family: "Rubik", "Inter", sans-serif;
+        font-size: 16px; line-height: 1.45;
+        outline: none; border: 0; width: 100%; resize: none; overflow: hidden;
+        min-height: 24px; direction: auto; text-align: start; padding: 2px 0;
+      }
+      .seg-text:focus { color: #fff; }
+      .seg-actions {
+        display: flex; flex-direction: column; gap: 4px;
+        align-items: center; padding-top: 2px;
+      }
+      .seg-action {
+        background: transparent; border: 0; color: var(--muted); cursor: pointer;
+        padding: 4px 8px; font-size: 16px; line-height: 1;
+      }
+      .seg-action:hover { color: var(--pink); }
+      .seg-action.hidden { display: none; }
+      .seg-suggestion {
+        grid-column: 2; margin-top: 8px; padding: 10px 14px;
+        background: rgba(255, 210, 74, 0.08);
+        border-left: 3px solid var(--yellow);
+        font-size: 15px; color: var(--yellow);
+        direction: auto; font-family: "Rubik", "Inter", sans-serif;
+      }
+      .seg-suggestion .actions { display: flex; gap: 8px; margin-top: 10px; direction: ltr; }
+      .seg-suggestion button {
+        background: var(--yellow); color: var(--bg); border: 0;
+        padding: 4px 14px; font-size: 12px; font-weight: 700;
+        cursor: pointer; font-family: "Inter", sans-serif;
+        letter-spacing: 0.04em; text-transform: uppercase;
+      }
+      .seg-suggestion button.reject {
+        background: transparent; color: var(--muted); border: 1px solid var(--muted);
+      }
+
+      .preview {
+        border-left: 1px solid var(--line); background: var(--panel);
+        display: flex; flex-direction: column; overflow-y: auto;
+      }
+      .preview video { width: 100%; aspect-ratio: 16/9; background: #000; }
+      .tools {
+        padding: 16px; display: flex; flex-direction: column; gap: 8px;
+        border-top: 1px solid var(--line);
+      }
+      .tool-btn {
+        padding: 12px 16px; background: var(--panel-2);
+        border: 1px solid var(--line); color: var(--ink); cursor: pointer;
+        text-align: left; font-size: 14px;
+        font-family: "Inter", sans-serif; font-weight: 500;
+      }
+      .tool-btn:hover { border-color: var(--pink); }
+      .tool-btn.primary {
+        background: var(--pink); color: var(--bg); border-color: var(--pink);
+        font-family: "Anton", sans-serif; font-size: 16px;
+        text-align: center; letter-spacing: 0.05em;
+        text-transform: uppercase; font-weight: 400; padding: 14px;
+      }
+      .ai-status {
+        padding: 12px 14px; background: var(--panel-2);
+        font-size: 12px; color: var(--muted); border: 1px solid var(--line);
+        font-family: "JetBrains Mono", monospace;
+      }
+      .ai-status.loading { color: var(--yellow); }
+      .ai-status.ready { color: var(--green); }
+      .ai-status.error { color: var(--red); }
+      .ai-progress { height: 4px; background: var(--line); margin-top: 6px; overflow: hidden; }
+      .ai-progress .fill {
+        height: 100%; background: var(--green); width: 0%; transition: width 0.3s;
+      }
+      .hint {
+        padding: 12px 14px; font-size: 12px; color: var(--muted);
+        line-height: 1.5; border: 1px dashed var(--line); font-family: "Inter", sans-serif;
+      }
+      .hint b { color: var(--ink); }
+      .hint code {
+        background: var(--bg); padding: 1px 6px; color: var(--yellow);
+        font-family: "JetBrains Mono", monospace; font-size: 11px;
+      }
+
+      .modal {
+        position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75);
+        display: none; align-items: center; justify-content: center; z-index: 1000;
+      }
+      .modal.open { display: flex; }
+      .modal-content {
+        background: var(--panel); border: 1px solid var(--line);
+        padding: 24px; width: 600px; max-width: 92%;
+      }
+      .modal h3 {
+        margin-bottom: 8px; font-family: "Anton", sans-serif;
+        color: var(--yellow); letter-spacing: 0.04em; font-size: 22px;
+      }
+      .modal .sub { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+      .modal textarea, .modal input[type="text"] {
+        width: 100%; background: var(--bg); color: var(--ink);
+        border: 1px solid var(--line); padding: 10px;
+        font-family: "JetBrains Mono", monospace; font-size: 13px;
+        resize: vertical; outline: none;
+      }
+      .modal textarea:focus, .modal input:focus { border-color: var(--pink); }
+      .modal textarea { min-height: 220px; direction: ltr; }
+      .modal input[type="text"] { margin-bottom: 10px; }
+      .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+
+      .hidden { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>HYPERFRAMES · TRANSCRIPT EDITOR</h1>
+      <div class="status" id="status">Drop a transcript.json + video to begin</div>
+    </header>
+
+    <div class="upload" id="upload">
+      <h2>Load your project</h2>
+      <p>
+        Pick the <code style="color:var(--yellow)">transcript.json</code> from your HyperFrames
+        project and the source video. The editor runs entirely in your browser — nothing leaves
+        your machine.
+      </p>
+      <div class="file-row">
+        <label class="file-btn" id="lbl-trsc">
+          <span class="check">✓</span>
+          <span class="lbl-text">Transcript (.json)</span>
+          <input type="file" id="in-trsc" accept=".json,application/json" />
+        </label>
+        <label class="file-btn" id="lbl-vid">
+          <span class="check">✓</span>
+          <span class="lbl-text">Video (.mp4, .mov, .mkv)</span>
+          <input type="file" id="in-vid" accept="video/*" />
+        </label>
+      </div>
+      <button class="start-btn" id="start">OPEN EDITOR</button>
+    </div>
+
+    <div class="editor hidden" id="editor">
+      <div class="segments" id="segments"></div>
+      <aside class="preview">
+        <video id="vid" controls></video>
+        <div class="tools">
+          <button class="tool-btn" id="btn-corrections">Apply corrections dictionary…</button>
+          <button class="tool-btn" id="btn-find">Find / replace…</button>
+          <button class="tool-btn" id="btn-ai">⚡ Enable AI suggestions (WebLLM)</button>
+          <div class="ai-status hidden" id="ai-status">
+            <div id="ai-status-text">Loading…</div>
+            <div class="ai-progress"><div class="fill" id="ai-fill"></div></div>
+          </div>
+          <div class="hint">
+            <b>Workflow:</b> Click a segment to seek the video. Edit text inline. Yellow stripe
+            = edited. Save the file, drop it back in the project, and tell your agent to
+            <code>continue</code> — it will run <code>apply_review.py</code> and re-render.
+          </div>
+          <button class="tool-btn primary" id="btn-save">Save transcript_review.txt</button>
+        </div>
+      </aside>
+    </div>
+
+    <div class="modal" id="modal-corrections">
+      <div class="modal-content">
+        <h3>Apply Corrections</h3>
+        <p class="sub">
+          Paste a JSON dictionary <code>{"wrong": "right", ...}</code>. Each matched whole-word
+          token gets replaced in every segment.
+        </p>
+        <textarea id="corrections-json"></textarea>
+        <div class="modal-actions">
+          <button class="tool-btn" data-close="modal-corrections">Cancel</button>
+          <button class="tool-btn primary" id="apply-corrections">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="modal-find">
+      <div class="modal-content">
+        <h3>Find / Replace</h3>
+        <p class="sub">Whole-segment text replacement (case-sensitive substring).</p>
+        <input type="text" id="find-text" placeholder="Find…" />
+        <input type="text" id="replace-text" placeholder="Replace with…" />
+        <div class="modal-actions">
+          <button class="tool-btn" data-close="modal-find">Cancel</button>
+          <button class="tool-btn primary" id="apply-find">Replace all</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      // ─── State ───────────────────────────────────────────────────────────
+      let transcript = null;
+      let videoUrl = null;
+      let activeIdx = -1;
+      let dirtyCount = 0;
+      let engine = null;
+      let aiEnabled = false;
+      const STORAGE_KEY = "hyperframes_transcript_edit_v1";
+
+      const $ = (id) => document.getElementById(id);
+      const make = (tag, props) => {
+        const el = document.createElement(tag);
+        if (props) {
+          for (const [k, v] of Object.entries(props)) {
+            if (k === "class") el.className = v;
+            else if (k === "data") for (const [dk, dv] of Object.entries(v)) el.dataset[dk] = dv;
+            else if (k === "text") el.textContent = v;
+            else if (k === "html") el.appendChild(v);
+            else if (k in el) el[k] = v;
+            else el.setAttribute(k, v);
+          }
+        }
+        return el;
+      };
+
+      // ─── File loading ────────────────────────────────────────────────────
+      $("in-trsc").addEventListener("change", async (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        try {
+          const text = await f.text();
+          transcript = JSON.parse(text);
+          if (!Array.isArray(transcript)) throw new Error("transcript.json must be an array");
+          $("lbl-trsc").classList.add("ready");
+          $("lbl-trsc").querySelector(".lbl-text").textContent = f.name;
+          $("status").textContent = transcript.length + " segments loaded";
+          checkReady();
+        } catch (err) { alert("Failed to load transcript: " + err.message); }
+      });
+
+      $("in-vid").addEventListener("change", (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        videoUrl = URL.createObjectURL(f);
+        $("lbl-vid").classList.add("ready");
+        $("lbl-vid").querySelector(".lbl-text").textContent = f.name;
+        checkReady();
+      });
+
+      function checkReady() {
+        $("start").classList.toggle("ready", !!transcript && !!videoUrl);
+      }
+
+      $("start").addEventListener("click", () => {
+        if (!transcript || !videoUrl) return;
+        const saved = loadAutosave();
+        if (saved && saved.length === transcript.length) {
+          if (confirm("Found unsaved edits from a previous session. Restore?")) {
+            transcript = saved;
+            dirtyCount = transcript.filter((s) => s.__dirty).length;
+          }
+        }
+        $("upload").classList.add("hidden");
+        $("editor").classList.remove("hidden");
+        $("vid").src = videoUrl;
+        renderSegments();
+        startActiveTracking();
+        updateStatus();
+      });
+
+      // ─── Render ──────────────────────────────────────────────────────────
+      function buildSegmentEl(seg, i) {
+        const segDiv = make("div", { class: "segment" + (seg.__dirty ? " dirty" : "") });
+        segDiv.dataset.idx = i;
+        segDiv.dataset.start = seg.start;
+
+        const time = make("div", { class: "seg-time", text: fmtTime(seg.start) });
+
+        const text = make("textarea", { class: "seg-text", rows: 1 });
+        text.dataset.idx = i;
+        text.value = seg.text;
+
+        const actions = make("div", { class: "seg-actions" });
+        const aiBtn = make("button", {
+          class: "seg-action ai-suggest" + (aiEnabled ? "" : " hidden"),
+          title: "Suggest fix with AI",
+          text: "🤖",
+        });
+        aiBtn.dataset.idx = i;
+        const seekBtn = make("button", {
+          class: "seg-action seek", title: "Play this segment", text: "▶",
+        });
+        seekBtn.dataset.idx = i;
+        actions.appendChild(aiBtn);
+        actions.appendChild(seekBtn);
+
+        segDiv.appendChild(time);
+        segDiv.appendChild(text);
+        segDiv.appendChild(actions);
+
+        text.addEventListener("input", (e) => {
+          const idx = +e.target.dataset.idx;
+          if (!transcript[idx].__dirty && transcript[idx].text !== e.target.value) {
+            transcript[idx].__dirty = true;
+            dirtyCount++;
+            segDiv.classList.add("dirty");
+            updateStatus();
+          }
+          transcript[idx].text = e.target.value;
+          autoResize(e.target);
+          scheduleAutosave();
+        });
+        segDiv.addEventListener("click", (e) => {
+          if (["TEXTAREA", "BUTTON"].includes(e.target.tagName)) return;
+          seekTo(seg.start, true);
+        });
+        seekBtn.addEventListener("click", () => seekTo(transcript[i].start, true));
+        aiBtn.addEventListener("click", () => suggestFix(i));
+
+        return { segDiv, textarea: text };
+      }
+
+      function renderSegments() {
+        const container = $("segments");
+        while (container.firstChild) container.removeChild(container.firstChild);
+        const frag = document.createDocumentFragment();
+        const taList = [];
+        transcript.forEach((seg, i) => {
+          const { segDiv, textarea } = buildSegmentEl(seg, i);
+          frag.appendChild(segDiv);
+          taList.push(textarea);
+        });
+        container.appendChild(frag);
+        // Resize textareas now that they're in the DOM
+        taList.forEach(autoResize);
+      }
+
+      function autoResize(ta) {
+        ta.style.height = "auto";
+        ta.style.height = ta.scrollHeight + "px";
+      }
+
+      function fmtTime(t) {
+        const m = Math.floor(t / 60);
+        const s = Math.floor(t % 60);
+        const c = Math.floor((t - Math.floor(t)) * 100);
+        return (String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0") + "." + String(c).padStart(2, "0"));
+      }
+
+      function seekTo(time, play) {
+        $("vid").currentTime = time;
+        if (play) $("vid").play().catch(() => {});
+      }
+
+      // ─── Active segment tracking ─────────────────────────────────────────
+      function startActiveTracking() {
+        const vid = $("vid");
+        const segs = $("segments");
+        let last = -1;
+        function tick() {
+          const t = vid.currentTime;
+          let idx = -1;
+          for (let i = 0; i < transcript.length; i++) {
+            const nextStart = transcript[i + 1] ? transcript[i + 1].start : Infinity;
+            if (t >= transcript[i].start && t < nextStart) { idx = i; break; }
+          }
+          if (idx !== last) {
+            document.querySelectorAll(".segment.active").forEach((s) => s.classList.remove("active"));
+            if (idx >= 0) {
+              const el = document.querySelector('.segment[data-idx="' + idx + '"]');
+              if (el) {
+                el.classList.add("active");
+                const rect = el.getBoundingClientRect();
+                const containerRect = segs.getBoundingClientRect();
+                if (rect.top < containerRect.top || rect.bottom > containerRect.bottom) {
+                  el.scrollIntoView({ block: "center", behavior: "smooth" });
+                }
+              }
+            }
+            last = idx;
+            activeIdx = idx;
+          }
+          requestAnimationFrame(tick);
+        }
+        tick();
+      }
+
+      // ─── Autosave ────────────────────────────────────────────────────────
+      let autosaveTimer = null;
+      function scheduleAutosave() {
+        clearTimeout(autosaveTimer);
+        autosaveTimer = setTimeout(() => {
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(transcript)); }
+          catch (e) { console.warn("Autosave failed:", e); }
+        }, 600);
+      }
+      function loadAutosave() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+      }
+
+      function updateStatus() {
+        const st = $("status");
+        if (dirtyCount > 0) {
+          st.textContent = dirtyCount + " edited · " + transcript.length + " total";
+          st.classList.add("dirty");
+        } else {
+          st.textContent = transcript.length + " segments";
+          st.classList.remove("dirty");
+        }
+      }
+
+      // ─── Corrections ─────────────────────────────────────────────────────
+      $("btn-corrections").onclick = () => openModal("modal-corrections");
+      $("apply-corrections").onclick = () => {
+        const raw = $("corrections-json").value.trim();
+        if (!raw) return;
+        let dict;
+        try { dict = JSON.parse(raw); }
+        catch (e) { alert("Invalid JSON: " + e.message); return; }
+        const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        let count = 0;
+        transcript.forEach((seg, i) => {
+          let txt = seg.text;
+          for (const [k, v] of Object.entries(dict)) {
+            const re = new RegExp("(^|[^\\p{L}\\p{N}])(" + escape(k) + ")(?=$|[^\\p{L}\\p{N}])", "gu");
+            txt = txt.replace(re, (m, before) => before + v);
+          }
+          if (txt !== seg.text) {
+            seg.text = txt;
+            if (!seg.__dirty) { seg.__dirty = true; dirtyCount++; }
+            count++;
+          }
+        });
+        renderSegments();
+        updateStatus();
+        scheduleAutosave();
+        closeModal("modal-corrections");
+        $("status").textContent = "Applied corrections to " + count + " segments";
+      };
+
+      // ─── Find/replace ────────────────────────────────────────────────────
+      $("btn-find").onclick = () => openModal("modal-find");
+      $("apply-find").onclick = () => {
+        const find = $("find-text").value;
+        const repl = $("replace-text").value;
+        if (!find) return;
+        const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const re = new RegExp(escape(find), "g");
+        let count = 0;
+        transcript.forEach((seg, i) => {
+          const before = seg.text;
+          seg.text = seg.text.replace(re, repl);
+          if (seg.text !== before) {
+            if (!seg.__dirty) { seg.__dirty = true; dirtyCount++; }
+            count++;
+          }
+        });
+        renderSegments();
+        updateStatus();
+        scheduleAutosave();
+        closeModal("modal-find");
+        $("status").textContent = "Replaced in " + count + " segments";
+      };
+
+      function openModal(id) { $(id).classList.add("open"); }
+      function closeModal(id) { $(id).classList.remove("open"); }
+      document.querySelectorAll("[data-close]").forEach((b) => {
+        b.addEventListener("click", () => closeModal(b.dataset.close));
+      });
+      document.querySelectorAll(".modal").forEach((m) => {
+        m.addEventListener("click", (e) => { if (e.target === m) closeModal(m.id); });
+      });
+
+      // ─── Save ────────────────────────────────────────────────────────────
+      $("btn-save").onclick = () => {
+        const lines = [
+          "# Transcript Review",
+          "# Edit the TEXT of any line — fix mishears, tighten phrasing.",
+          "# KEEP the [mm:ss.xx] prefix unchanged — that anchors the word timings.",
+          "# Save the file and tell the agent to continue.",
+          "",
+        ];
+        transcript.forEach((seg) => {
+          lines.push("[" + fmtTime(seg.start) + "] " + seg.text);
+        });
+        lines.push("");
+        lines.push("# Edited via HyperFrames Transcript Editor (webapp)");
+        const blob = new Blob([lines.join("\n") + "\n"], { type: "text/plain;charset=utf-8" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "transcript_review.txt";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        transcript.forEach((s) => { delete s.__dirty; });
+        dirtyCount = 0;
+        renderSegments();
+        updateStatus();
+        $("status").textContent = "Saved transcript_review.txt";
+      };
+
+      // ─── WebLLM (optional) ───────────────────────────────────────────────
+      const AI_MODELS = [
+        "Qwen2.5-3B-Instruct-q4f16_1-MLC",
+        "Llama-3.2-3B-Instruct-q4f16_1-MLC",
+        "Llama-3.2-1B-Instruct-q4f16_1-MLC",
+      ];
+
+      $("btn-ai").onclick = async () => {
+        if (aiEnabled) return;
+        const status = $("ai-status");
+        const statusText = $("ai-status-text");
+        const fill = $("ai-fill");
+        status.classList.remove("hidden", "error", "ready");
+        status.classList.add("loading");
+        statusText.textContent = "Importing WebLLM (first run downloads model, ~1–2 GB)…";
+
+        try {
+          const mod = await import("https://esm.run/@mlc-ai/web-llm");
+          const CreateMLCEngine = mod.CreateMLCEngine || (mod.default && mod.default.CreateMLCEngine);
+          if (!CreateMLCEngine) throw new Error("WebLLM not loaded");
+
+          const model = AI_MODELS[0];
+          statusText.textContent = "Loading " + model + "…";
+          engine = await CreateMLCEngine(model, {
+            initProgressCallback: (p) => {
+              statusText.textContent = p.text || ("Loading… " + Math.round((p.progress || 0) * 100) + "%");
+              fill.style.width = ((p.progress || 0) * 100) + "%";
+            },
+          });
+
+          statusText.textContent = "Ready · " + model;
+          status.classList.remove("loading");
+          status.classList.add("ready");
+          fill.style.width = "100%";
+          aiEnabled = true;
+          $("btn-ai").textContent = "✓ AI suggestions ON";
+          document.querySelectorAll(".ai-suggest").forEach((b) => b.classList.remove("hidden"));
+        } catch (e) {
+          console.error(e);
+          status.classList.remove("loading");
+          status.classList.add("error");
+          statusText.textContent = "Failed: " + e.message + " (WebGPU required)";
+        }
+      };
+
+      async function suggestFix(idx) {
+        if (!engine) return;
+        const seg = transcript[idx];
+        const prev = transcript[idx - 1] ? transcript[idx - 1].text : "";
+        const next = transcript[idx + 1] ? transcript[idx + 1].text : "";
+        const segEl = document.querySelector('.segment[data-idx="' + idx + '"]');
+
+        let sugg = segEl.querySelector(".seg-suggestion");
+        if (!sugg) {
+          sugg = make("div", { class: "seg-suggestion" });
+          segEl.appendChild(sugg);
+        }
+        while (sugg.firstChild) sugg.removeChild(sugg.firstChild);
+        sugg.appendChild(make("em", { text: "Generating suggestion…" }));
+
+        const prompt =
+          "You correct speech-to-text mishears in a Hebrew (sometimes mixed with English) " +
+          "transcript. PRESERVE the speaker's actual words, style, slang and length — only " +
+          "fix Whisper's transcription errors (especially product names like Claude / GitHub / " +
+          "Excalidraw, and Hebrew word confusions). Output ONLY the corrected line, no quotes, " +
+          "no explanation, no preamble.\n\n" +
+          'Previous: "' + prev + '"\nCurrent: "' + seg.text + '"\nNext: "' + next + '"\n\n' +
+          "Corrected current line:";
+
+        try {
+          const reply = await engine.chat.completions.create({
+            messages: [{ role: "user", content: prompt }],
+            max_tokens: 300,
+            temperature: 0.2,
+          });
+          const raw = (reply.choices && reply.choices[0] && reply.choices[0].message && reply.choices[0].message.content) || "";
+          const corrected = raw.trim().replace(/^["'`]|["'`]$/g, "");
+          if (!corrected) throw new Error("Empty response");
+
+          while (sugg.firstChild) sugg.removeChild(sugg.firstChild);
+          sugg.appendChild(make("div", { text: corrected }));
+          const acts = make("div", { class: "actions" });
+          const accept = make("button", { text: "Accept" });
+          const reject = make("button", { class: "reject", text: "Dismiss" });
+          acts.appendChild(accept);
+          acts.appendChild(reject);
+          sugg.appendChild(acts);
+
+          accept.addEventListener("click", () => {
+            transcript[idx].text = corrected;
+            const ta = segEl.querySelector(".seg-text");
+            ta.value = corrected;
+            autoResize(ta);
+            if (!transcript[idx].__dirty) { transcript[idx].__dirty = true; dirtyCount++; }
+            segEl.classList.add("dirty");
+            updateStatus();
+            sugg.remove();
+            scheduleAutosave();
+          });
+          reject.addEventListener("click", () => sugg.remove());
+        } catch (e) {
+          while (sugg.firstChild) sugg.removeChild(sugg.firstChild);
+          const errDiv = make("div", { text: "Error: " + e.message });
+          errDiv.style.color = "var(--red)";
+          sugg.appendChild(errDiv);
+        }
+      }
+
+      // ─── Keyboard shortcuts ──────────────────────────────────────────────
+      document.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "TEXTAREA" || e.target.tagName === "INPUT") return;
+        if (e.code === "Space") {
+          e.preventDefault();
+          const v = $("vid");
+          v.paused ? v.play() : v.pause();
+        }
+        if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          $("btn-save").click();
+        }
+      });
+    </script>
+  </body>
+</html>

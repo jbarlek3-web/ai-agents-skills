@@ -12,6 +12,52 @@
 
 ---
 
+## 🆕 NEW: Video-Edit Skill (with Interactive Transcript Editor)
+
+A complete captioned-video pipeline that **pauses for human transcript approval** before the
+long final render — the support mechanism that makes captions perfect (especially Hebrew).
+Transcribes any video with `faster-whisper` (defaults to `large-v3`), applies a configurable
+corrections dictionary, opens an **interactive browser editor** with video preview, per-line
+inline editing, dictionary apply, find/replace and **optional in-browser LLM suggestions via
+WebLLM** (Qwen2.5-3B / Llama-3.2-3B over WebGPU — runs entirely offline once cached). On
+approval, redistributes word timings and generates a HyperFrames composition with
+liquid-glass caption pills, drifting blob background, liquid morph wipes, and optional
+behind-subject text via background removal. Supports English, Hebrew and any
+Whisper-supported language.
+
+🔗 **[View the Video-Edit Skill →](skills/video-edit/SKILL.md)**
+
+**What's inside:**
+- `transcribe.py` — faster-whisper CPU/CUDA with safe fallback
+- `make_review.py` + `apply_review.py` — emit & ingest a `transcript_review.txt` round-trip
+- `transcript-editor/index.html` — self-contained webapp (RTL-aware, autosaves to localStorage)
+- `gen_body.py` — generator for editorial + matrix liquid-glass caption sub-composition
+- `host-template.html` + `liquid-blobs.html` + EN/HE parallax-outro templates
+- `corrections-hebrew.md` — curated dictionary of common Hebrew Whisper mishears
+
+---
+
+## 🆕 NEW: Video-to-Landing-Page Skill
+
+Drop a video, get a cinematic **scroll-driven landing page** — Apple-style sticky hero where
+scrolling progresses the visible frame through the video. Extracts evenly-spaced frames via
+ffmpeg, builds a self-contained `index.html` with a `requestAnimationFrame`-driven scroll
+listener, and includes headline / sections / CTA below. Respects the `yuv-design` typography
+(Anton + Inter for English, Rubik + Assistant for Hebrew) and pink/yellow/bone palette.
+
+🔗 **[View the Video-to-Landing-Page Skill →](skills/video-to-landing-page/SKILL.md)**
+
+**One command from video to deployable page:**
+
+```bash
+python skills/video-to-landing-page/references/extract-frames.py demo.mp4 ./landing-demo --build-html
+```
+
+Then customise `__HEADLINE__`, `__TAGLINE__`, `__CTA_TEXT__` in the generated `index.html`
+and drop the folder on Vercel / Netlify / Cloudflare Pages.
+
+---
+
 ## 🚀 NEW: Yuv-Viral-Video Skill
 
 **Just added!** The complete signature-style video editor that turns raw selfie or screen-share footage into a viral short-form video the way YUV.AI ships them — Apple-style liquid-glass cards with real backdrop blur, dark-mode polish, MrBeast-paced cuts, video-title karaoke captions, content-relevant motion graphics, no fake content, **never covering the speaker's face**, always rendering BOTH 9:16 and 16:9, always saving with `_V<N>` backup suffix. Hebrew is rendered in Rubik Black (with proper RTL via `python-bidi`), English in Anton uppercase. Encodes every painful lesson from real edits as a hard rule the next render automatically respects.
@@ -286,6 +332,8 @@ Agent Skills work with these AI coding agents:
 
 | Skill | Description | Keywords |
 |:------|:------------|:---------|
+| **[video-edit](skills/video-edit/SKILL.md)** 🆕 | Captioned-video pipeline with interactive transcript editor + WebLLM suggestions before render | `video edit`, `captions`, `transcribe`, `Hebrew`, `WebLLM`, `liquid-glass captions`, `HyperFrames` |
+| **[video-to-landing-page](skills/video-to-landing-page/SKILL.md)** 🆕 | Apple-style scroll-driven landing page from any video — frames scrub on scroll | `landing page from video`, `scroll-frame`, `Apple scroll`, `scrub on scroll` |
 | **[meta-ads](skills/meta-ads/SKILL.md)** 🆕 | Meta Marketing API — Facebook, Instagram, CTWA ad insights, fatigue analysis, write actions | `Meta ads`, `Facebook ads`, `Instagram ads`, `Marketing API`, `ROAS`, `CPA`, `CTR`, `CTWA`, `creative fatigue` |
 | **[google-workspace-cli](skills/google-workspace-cli/SKILL.md)** 🆕 | Google Workspace CLI (`gws`) — Drive, Gmail, Calendar, Sheets, Docs, Chat & more | `gws`, `Google Workspace`, `Google Drive`, `Gmail`, `Google Calendar`, `Google Sheets`, `MCP` |
 | **[copilot-sdk](skills/copilot-sdk/SKILL.md)** | GitHub Copilot SDK for building agentic applications | `Copilot SDK`, `GitHub SDK`, `agentic app`, `embed Copilot` |
