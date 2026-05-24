@@ -12,6 +12,39 @@
 
 ---
 
+## 🆕 NEW: Parallax Landing Page Skill
+
+Turn any short video (5–15s) into a **cinematic scroll-driven landing page** where the
+user's scroll gesture *scrubs the frames in place* — the page itself never scrolls. A single
+locked viewport with five dramatic text scenes that crossfade in/out as the frame index
+advances, an Anton + Caveat typography contract, off-white #f5f1ea (never pure white), a
+vignette + film-grain overlay, a loader that preloads every frame, and a final scene that
+holds the CTAs (no separate end section). Built on the proven `parasites/` reference repo
+(GitHub Desktop / Marcus the white lion / Hope the cheetah landings).
+
+🔗 **[View the Parallax Landing Page Skill →](skills/parallax-landing-page/SKILL.md)**
+
+**What's inside:**
+- `scripts/extract_frames.py` — ffprobe + ffmpeg `-q:v 2` extraction with auto-computed `scrollBudget` (≈26 px per frame, clamped to `[2500, 8000]`)
+- `assets/parallax.js` — virtual-scroll controller: wheel/touch/keyboard intercepted, document never moves, RAF-driven lerp (0.22) for buttery frame scrubbing
+- `assets/style.css` — locked-body landing page CSS (`body.scrub-page`), 5-scene grid, vignette + grain, Anton/Caveat/Inter font stack
+- `assets/landing-page-template.html` — full template with `{{placeholders}}` for slug, scenes, CTAs
+- `assets/hub-template.html` — 3-up showcase grid template for multi-landing projects
+- `references/copy-guide.md` — the five-beat arc (Hook → Origin → Stakes → Moment → Resolution) with three real cinematic examples
+- `references/showcase-integration.md` — exact edits to grow an existing hub (card + nav + chain CTA)
+
+**One-shot:** point the script at a video, capture the JSON, fill in the template, serve with `python -m http.server`.
+
+```bash
+python skills/parallax-landing-page/scripts/extract_frames.py demo.mp4 ./out/demo
+```
+
+> Note: distinct from `video-to-landing-page` (which uses an evenly-spaced
+> scroll-listener approach). This skill is the "Apple AirPods Pro" variant — every frame,
+> locked body, dramatic typography, narrative beats.
+
+---
+
 ## 🆕 NEW: Video-Edit Skill (with Interactive Transcript Editor)
 
 A complete captioned-video pipeline that **pauses for human transcript approval** before the
@@ -332,6 +365,7 @@ Agent Skills work with these AI coding agents:
 
 | Skill | Description | Keywords |
 |:------|:------------|:---------|
+| **[parallax-landing-page](skills/parallax-landing-page/SKILL.md)** 🆕 | Cinematic scroll-scrub landing page from a short video — locked body, virtual scroll, 5 crossfading scenes, Anton + Caveat typography | `parallax landing`, `scroll-scrub`, `frame-by-frame`, `Anton`, `Caveat`, `locked hero`, `virtual scroll`, `video to landing page` |
 | **[video-edit](skills/video-edit/SKILL.md)** 🆕 | Captioned-video pipeline with interactive transcript editor + WebLLM suggestions before render | `video edit`, `captions`, `transcribe`, `Hebrew`, `WebLLM`, `liquid-glass captions`, `HyperFrames` |
 | **[video-to-landing-page](skills/video-to-landing-page/SKILL.md)** 🆕 | Apple-style scroll-driven landing page from any video — frames scrub on scroll | `landing page from video`, `scroll-frame`, `Apple scroll`, `scrub on scroll` |
 | **[meta-ads](skills/meta-ads/SKILL.md)** 🆕 | Meta Marketing API — Facebook, Instagram, CTWA ad insights, fatigue analysis, write actions | `Meta ads`, `Facebook ads`, `Instagram ads`, `Marketing API`, `ROAS`, `CPA`, `CTR`, `CTWA`, `creative fatigue` |
