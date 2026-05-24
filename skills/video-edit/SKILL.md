@@ -1,6 +1,6 @@
 ---
 name: video-edit
-description: Edit any video into a captioned showcase — transcribe (any language, defaults to large-v3), present a transcript_review.txt for the user to fix mishears BEFORE rendering, then build a HyperFrames composition with liquid-glass caption pills, liquid blob background, liquid morph wipes, optional behind-subject text via background removal, and render the final video. Use whenever the user provides a video file and asks to edit it, caption it, add subtitles, fix existing captions, make a reel/promo/captioned tutorial, or "do the same" pattern as a prior captioned video. Supports English, Hebrew, and any Whisper-supported language. THE PIPELINE PAUSES FOR USER APPROVAL on the transcript before final render — this is the support mechanism for getting captions perfect (especially Hebrew). Pairs with hyperframes, hyperframes-cli, hyperframes-registry, and yuv-frontend-design skills.
+description: Edit any video into a captioned showcase — transcribe (any language, defaults to large-v3), present a transcript_review.txt for the user to fix mishears BEFORE rendering, then build a HyperFrames composition with liquid-glass caption pills, liquid blob background, liquid morph wipes, optional behind-subject text via background removal, and render the final video. Use whenever the user provides a video file and asks to edit it, caption it, add subtitles, fix existing captions, make a reel/promo/captioned tutorial, or "do the same" pattern as a prior captioned video. Supports English, Hebrew, and any Whisper-supported language. **Renders both 16:9 (YouTube / horizontal) and 9:16 (TikTok / Instagram Reels / YouTube Shorts) from the SAME 16:9 source** — vertical mode uses a centered footage strip with a blurred backdrop + liquid blobs and a vertical-tuned caption pill, no need to re-shoot. THE PIPELINE PAUSES FOR USER APPROVAL on the transcript before final render — this is the support mechanism for getting captions perfect (especially Hebrew). Pairs with hyperframes, hyperframes-cli, hyperframes-registry, and yuv-frontend-design skills.
 ---
 
 # Video Edit — Captioned Showcase Pipeline
@@ -66,6 +66,19 @@ End-to-end captioned video editor on top of HyperFrames. The user gives you a vi
 11. **Lint** — `npx hyperframes lint`. Must be 0 errors. Common fixes: GSAP/CSS transform conflict on the wipe element (use `xPercent/yPercent` or remove the CSS transform); overlapping tweens on the same property (add `overwrite: "auto"`).
 12. **Render** — `npx hyperframes render --quality standard --fps 30 --output renders/<name>_FINAL.mp4`. Standard is the right delivery target — `high` roughly doubles render time. Verify with 6–8 spot-check frames from across the timeline before reporting done.
 
+### Vertical (9:16) output for TikTok / Reels / Shorts
+
+When the user asks for vertical / portrait / TikTok / Reels / 9:16 output (from a 16:9 source):
+
+1. Clone the project to a sibling folder: `cp -r project/ project-vertical/`.
+2. Replace its `index.html` with `references/host-template-vertical.html` (1080×1920 canvas, blurred-bg backdrop with liquid blobs, the 16:9 footage as a centered horizontal strip, captions below).
+3. Replace its `gen_body.py` with `references/gen_body_vertical.py` (centered pill, larger fonts, narrower max-width), then re-run it to emit `compositions/components/caption-body.html`.
+4. Drop the behind-subject cut-out + parallax sub-compositions (the cutout is aligned for 16:9; not worth re-aligning for v1). The vertical comp uses the blurred-source backdrop + blobs for atmosphere instead.
+5. Update `data-duration` to the actual video duration. Update the brand-chip text in `index.html` (`YUV.AI` by default).
+6. Lint + render — same commands. Output is `1080×1920`. Drop straight onto TikTok / IG Reels / YT Shorts.
+
+To deliver **both** 16:9 and 9:16 in one go, run two render commands (in parallel projects). The transcript_review.txt approval applies to both — same captions, two compositions.
+
 ## Critical rules
 
 - **Never render the final without explicit transcript approval.** The review step is the whole point.
@@ -87,7 +100,9 @@ End-to-end captioned video editor on top of HyperFrames. The user gives you a vi
 | `references/make_review.py` | Apply corrections + emit `transcript_review.txt` (file-mode fallback) |
 | `references/apply_review.py` | Parse edited review file, redistribute word timings, update `transcript.json` |
 | `references/gen_body.py` | Caption-body generator (editorial + matrix in liquid-glass pills) |
-| `references/host-template.html` | Full host composition with liquid effects + transition wipe |
+| `references/host-template.html` | **16:9** host composition with liquid effects + transition wipe |
+| `references/host-template-vertical.html` | **9:16** host (1080×1920) — TikTok / Reels / Shorts layout: blurred bg, centered 16:9 footage strip, captions below, brand chip top-right |
+| `references/gen_body_vertical.py` | Caption-body generator tuned for vertical (centered pill, larger fonts, narrower max-width) |
 | `references/liquid-blobs.html` | Full-duration drifting blob layer |
 | `references/caption-parallax-outro.html` | Behind-subject caption template (English; clone for other languages) |
 | `references/corrections-hebrew.md` | Known Hebrew Whisper mishears |
