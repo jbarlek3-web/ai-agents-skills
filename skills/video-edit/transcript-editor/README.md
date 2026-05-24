@@ -6,6 +6,11 @@ that follows the faster-whisper word-level format.
 
 ## What it does
 
+- **One-click project folder load** — point at a HyperFrames project directory and the
+  editor auto-finds `transcript.json` + the source/footage video, opens itself, and saves
+  `transcript_review.txt` back to the same folder when you hit Save (uses the File System
+  Access API; Chrome/Edge 86+, Safari 15.2+; falls back to individual file pickers and a
+  download on unsupported browsers).
 - Loads a `transcript.json` (word-level whisper output) and a source video — entirely in
   the browser, zero upload.
 - Renders each segment as an inline-editable textarea with the timecode prefix.
