@@ -9,6 +9,8 @@ The canonical personal brand and design system for **Yuval Avidani** (yuv.ai). T
 
 **Source of truth:** Public reference repo at https://github.com/hoodini/yuv-design-system (private). The repo holds runnable tokens and components; this skill encodes the rules so Claude can apply them in any context.
 
+**Where this skill sits in the YUV.AI pyramid:** `yuv-design-system` is the middle-tier visual-rules skill. Above it is `yuv-pilot` — the top-of-pyramid orchestrator that routes ambiguous or multi-medium YUV.AI requests to the right combination of downstream skills. Below it (and beside it in the middle tier) are `yuv-decks` (slide builds) and `yuv-viral-video` (viral short MP4s). When `yuv-pilot` or a sibling skill calls into here, they pin a specific palette mode (Neon / Decks / Warm Editorial) — never let the mode drift mid-task. See `yuv-pilot/SKILL.md` for the full pyramid map.
+
 ---
 
 ## §0. WHEN TO APPLY THIS SKILL — read this before anything else
