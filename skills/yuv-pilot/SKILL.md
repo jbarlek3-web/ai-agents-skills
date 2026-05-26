@@ -93,7 +93,9 @@ When the deliverable is clear, route directly. When it's ambiguous, ask once and
 | User wants… | Lead skill | Compose with | Notes |
 |---|---|---|---|
 | **Slide deck / keynote / talk / hackathon presentation** for YUV.AI | `yuv-decks` | `yuv-design-system` (**Decks mode** — Fly High purple/yellow/grey) · `slide-authoring` · `open-slide` · optionally `nano-banana-pro` for hero imagery · optionally `mermaid-diagrams` for architecture diagrams | yuv-decks scaffolds via `./scripts/new-deck.sh`. Drops AGENTS.md / CLAUDE.md / .github/copilot-instructions.md into the new deck root. |
-| **Website / landing page / portfolio / About page** for YUV.AI | `yuv-design-system` (**Neon mode** — pink/cyan/white or rich black) | `gsap` for non-trivial animation · `hyperframes` if the hero needs an MP4-renderable composition · `parallax-landing-page` for parallax-heavy work | New project: run `install-agent-instructions.sh /path/to/project` to drop in the cross-tool instructions. |
+| **Website / landing page / portfolio / About page** for YUV.AI | `yuv-design-system` (**Neon mode** — pink/cyan/white or rich black) | `gsap` for non-trivial animation · `hyperframes` if the hero needs an MP4-renderable composition | New project: run `install-agent-instructions.sh /path/to/project` to drop in the cross-tool instructions. |
+| **Cinematic scroll-scrub landing from a short video** (the github/lion/hope showcase pattern — 5–15s clip becomes a single-screen hero where scrolling scrubs the video frame-by-frame and 5 text overlays crossfade) | `parallax-landing-page` | Brings its OWN type stack (Anton + Caveat + Inter) and accent palette (gold/amber/accent/cream). Does NOT call `yuv-design-system` — they coexist. For YUV.AI parallax landings, optionally add the phoenix watermark + Linktree URL as throughline. | Saves to `~/Documents/yuv-projects/landings/<slug>/`. Reference implementations live at `examples/parasites/`. |
+| **Apple-style video-scrub landing with normal sections below** (sticky hero scrubs N frames as you scroll, then content sections continue) | `video-to-landing-page` | `yuv-design-system` in **Neon mode** for YUV.AI projects; no design system at all for generic / third-party work | The shorter, more conventional sibling to `parallax-landing-page`. Use when the hero is a teaser and the rest of the page carries copy + CTA. |
 | **Web app / dashboard / interactive tool** for YUV.AI | `yuv-design-system` (**Neon mode**) | `gsap` · framework of choice (React, Svelte, plain) · `mermaid-diagrams` if there's an architecture diagram | One-Anton-per-screen rule applies. Use `<CounterUp>` for big stats. Glow on hero / primary CTA only. |
 | **Game / interactive 3D experience** for YUV.AI | `yuv-design-system` (**Neon mode**) | Three.js · `gsap` for tweening · `hyperframes` if the game is capture-destined for a reel | Faceted brand-colored geometry. Pink/cyan accents on rich-black canvas is the strongest look. |
 | **Promo video / reel / short / TikTok / Shorts** featuring Yuval | `yuv-viral-video` | `video-use` (cuts) · `hyperframes` (composition layer) · `gsap` (motion graphics) · `yuv-design-system` for type/palette overlay decisions · optionally `nano-banana-pro` for cutaway imagery | Always renders BOTH 9:16 AND 16:9. Saves with `_V<N>` suffix. |
@@ -203,8 +205,8 @@ These are the generic tools the middle tier calls down to. yuv-pilot doesn't loa
 | `gsap` | Primary animation library across all YUV.AI work. |
 | `nano-banana-pro` | Image generation. Use the active mode's palette in prompts. |
 | `mermaid-diagrams` | Architecture / flow / sequence diagrams in markdown. |
-| `parallax-landing-page` | When a YUV.AI landing page wants heavy parallax. |
-| `video-to-landing-page` | One-shot: turn a YUV.AI talk recording into a landing page. |
+| `parallax-landing-page` | Cinematic scroll-scrub landing from a short video — the github/lion/hope showcase pattern. Has its own visual language; sits beside yuv-design-system rather than under it. |
+| `video-to-landing-page` | Apple-style video-scrub hero with normal-scroll sections below. Calls into yuv-design-system (Neon mode) for YUV.AI projects. |
 | `cinematic-ai-video` | AI-generated cinematography (Sora / Veo / Runway). |
 | `hope-born-to-run` | Hope (cheetah) + Marcus (white lion) campaign content. Pairs with Warm Editorial. |
 
