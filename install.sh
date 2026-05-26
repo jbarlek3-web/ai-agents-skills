@@ -2,6 +2,7 @@
 # ─────────────────────────────────────────────────────────────
 # YUV.AI Skills · One-shot installer for any machine
 # Sets up the FULL creative stack:
+#   Orchestrator — yuv-pilot (top-of-pyramid router)
 #   Design       — yuv-design-system
 #   Decks        — yuv-decks
 #   Videos       — yuv-viral-video, video-edit, video-to-landing-page,
@@ -166,6 +167,7 @@ CLONE_TMP="$(mktemp -d)/ai-agents-skills"
 git clone --depth 1 --sparse \
   https://github.com/hoodini/ai-agents-skills "$CLONE_TMP" >/dev/null 2>&1
 ( cd "$CLONE_TMP" && git sparse-checkout set \
+    skills/yuv-pilot \
     skills/yuv-decks \
     skills/yuv-viral-video \
     skills/yuv-design-system \
@@ -175,7 +177,7 @@ git clone --depth 1 --sparse \
     skills/nano-banana-pro \
     skills/mermaid-diagrams >/dev/null 2>&1 )
 
-for skill in yuv-decks yuv-viral-video yuv-design-system video-edit video-to-landing-page parallax-landing-page nano-banana-pro mermaid-diagrams; do
+for skill in yuv-pilot yuv-decks yuv-viral-video yuv-design-system video-edit video-to-landing-page parallax-landing-page nano-banana-pro mermaid-diagrams; do
   if [ -d "$HOME/.claude/skills/$skill" ]; then
     info "$skill already exists — refreshing"
     rm -rf "$HOME/.claude/skills/$skill"
@@ -185,6 +187,41 @@ for skill in yuv-decks yuv-viral-video yuv-design-system video-edit video-to-lan
 done
 
 rm -rf "$(dirname "$CLONE_TMP")"
+
+# ─── 1a. Cross-tool symlinks: ~/.copilot/skills + ~/.agents/skills ────
+#         (GitHub Copilot CLI + Cursor / Aider / Codex CLI discover skills here)
+step "Creating cross-tool symlinks for the YUV.AI pyramid"
+
+PYRAMID_SKILLS=(
+  yuv-pilot
+  yuv-design-system
+  yuv-decks
+  yuv-viral-video
+  video-edit
+  parallax-landing-page
+  video-to-landing-page
+)
+
+for dir in "$HOME/.copilot/skills" "$HOME/.agents/skills"; do
+  mkdir -p "$dir"
+done
+
+for skill in "${PYRAMID_SKILLS[@]}"; do
+  src="$HOME/.claude/skills/$skill"
+  [ -d "$src" ] || { warn "$skill not at $src — skipping symlinks"; continue; }
+  for link_root in "$HOME/.copilot/skills" "$HOME/.agents/skills"; do
+    link="$link_root/$skill"
+    if [ -L "$link" ]; then
+      ln -sfn "$src" "$link"
+    elif [ -e "$link" ]; then
+      warn "$link exists and isn't a symlink — leaving alone"
+      continue
+    else
+      ln -s "$src" "$link"
+    fi
+  done
+done
+ok "Symlinked $((${#PYRAMID_SKILLS[@]})) pyramid skills into ~/.copilot/skills + ~/.agents/skills"
 
 # ─── 1b. faster-whisper for the video-edit pipeline ──────────
 step "Installing faster-whisper (video-edit transcription)"
@@ -312,7 +349,7 @@ INSTALLED_SKILLS=$(ls "$HOME/.claude/skills" | tr '\n' ' ')
 ok "Installed skills: $INSTALLED_SKILLS"
 
 ALL_GOOD=1
-for skill in yuv-decks yuv-viral-video yuv-design-system video-edit video-to-landing-page parallax-landing-page nano-banana-pro mermaid-diagrams video-use hyperframes hyperframes-cli hyperframes-registry gsap website-to-hyperframes; do
+for skill in yuv-pilot yuv-decks yuv-viral-video yuv-design-system video-edit video-to-landing-page parallax-landing-page nano-banana-pro mermaid-diagrams video-use hyperframes hyperframes-cli hyperframes-registry gsap website-to-hyperframes; do
   if [ -e "$HOME/.claude/skills/$skill" ]; then
     ok "$skill"
   else

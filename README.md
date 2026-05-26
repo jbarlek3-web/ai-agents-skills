@@ -23,7 +23,7 @@
 curl -sSL https://raw.githubusercontent.com/hoodini/ai-agents-skills/master/install.sh | bash
 ```
 
-Installs **14 skills** as one package: **yuv-design-system** (brand) · **yuv-decks** (cinematic presentations) · **yuv-viral-video** (short-form) · **video-edit** · **video-to-landing-page** · **parallax-landing-page** · **hyperframes** + 4 companions · **nano-banana-pro** (AI images) · **mermaid-diagrams**. Plus ffmpeg / Node / Python / faster-whisper / hyperframes CLI / Python venvs. Works on macOS, Linux, Windows (Git Bash/WSL).
+Installs **15 skills** as one package: **yuv-pilot** (top-of-pyramid orchestrator) · **yuv-design-system** (brand) · **yuv-decks** (cinematic presentations) · **yuv-viral-video** (short-form) · **video-edit** · **video-to-landing-page** · **parallax-landing-page** · **hyperframes** + 4 companions · **nano-banana-pro** (AI images) · **mermaid-diagrams**. Plus ffmpeg / Node / Python / faster-whisper / hyperframes CLI / Python venvs / cross-tool symlinks to ~/.copilot/skills + ~/.agents/skills. Works on macOS, Linux, Windows (Git Bash/WSL).
 
 After install, restart your agent and just type what you want:
 
@@ -36,6 +36,73 @@ After install, restart your agent and just type what you want:
 The right skill auto-fires. Projects save to **`~/Documents/yuv-projects/{decks,landings,videos}/<slug>/`** so they're always findable.
 
 > 🌐 **Live examples:** [yuv.ai](https://yuv.ai) · [effects.yuv.ai](https://effects.yuv.ai) (HyperFrames effects catalog) · [examples/parasites/](examples/parasites/) (three parallax landings: GitHub Desktop, Marcus the lion, Hope the cheetah)
+
+---
+
+## 🪜 The YUV.AI skills pyramid
+
+The YUV.AI creative stack is a **three-tier pyramid**. You don't have to remember which skill does what — say what you want, the orchestrator routes.
+
+```
+                  ┌─────────────────────┐
+                  │     yuv-pilot       │   ← top: intent → route
+                  │  (orchestrator)     │
+                  └──────────┬──────────┘
+                             │
+        ┌────────────────────┼────────────────────┐
+        ▼                    ▼                    ▼
+   ┌─────────┐        ┌─────────────┐      ┌──────────────┐
+   │yuv-decks│        │ yuv-design- │      │  yuv-viral-  │
+   │         │        │   system    │      │    video     │
+   │ talks · │        │             │      │              │
+   │ slides ·│        │ palette ·   │      │ short MP4s · │
+   │ keynotes│        │ typography ·│      │ Reels · TikTok│
+   │         │        │ 3 modes ·   │      │ MrBeast-paced │
+   │         │        │ assets      │      │ editorial    │
+   └─────────┘        └─────────────┘      └──────────────┘
+   ┌─────────────┐    ┌─────────────────┐  ┌──────────────────┐
+   │ video-edit  │    │ parallax-       │  │ video-to-        │
+   │             │    │ landing-page    │  │ landing-page     │
+   │ captioned · │    │                 │  │                  │
+   │ Hebrew+EN · │    │ scroll-scrub ·  │  │ Apple-style ·    │
+   │ transcript- │    │ video frames ·  │  │ sticky hero ·    │
+   │ review flow │    │ github/lion/hope│  │ frames + sections│
+   └─────────────┘    └─────────────────┘  └──────────────────┘
+                             │
+                             ▼ (the middle tier uses these)
+   open-slide · hyperframes · gsap · nano-banana-pro · video-use ·
+   slide-authoring · mermaid-diagrams · hyperframes-cli · website-to-hyperframes
+
+                  Brand DNA — universal Fly High throughline:
+                  flight metaphors · HUD + dials · phoenix mark ·
+                  "Let's Fly High" watermark · Anton + JetBrains Mono
+                  (palette is the chapter, motifs are the brand)
+```
+
+### How to invoke
+
+| Say | What fires |
+|---|---|
+| `"build me a deck about <topic> for <audience>"` | `yuv-decks` (lead) + `yuv-design-system` in **Decks mode** + `open-slide` scaffolding |
+| `"build a landing page for me / my brand"` | `yuv-design-system` in **Neon mode** + `gsap` for motion |
+| `"turn this video into a landing page"` *(5–15s clip)* | `parallax-landing-page` — scroll-scrub cinematic landing |
+| `"turn this video into a landing page"` *(longer, with sections)* | `video-to-landing-page` — Apple-style sticky-hero |
+| `"edit this video / add captions"` | `video-edit` — transcript-review-before-render workflow |
+| `"make it viral / YUV.AI short"` | `yuv-viral-video` — opinionated MrBeast-paced pipeline |
+| `"launch my new course / cross-channel campaign"` | `yuv-pilot` — orchestrates a build order across multiple skills |
+| `"what should I build for my brand"` *(strategic, no specific deliverable)* | `yuv-pilot` — surfaces options |
+| `"build me a snake game"` *(no YUV.AI signal)* | **Whole pyramid stays out** — picks whatever palette fits |
+| `"build me a YUV.AI snake game"` *(explicit brand signal)* | `yuv-design-system` in **Neon mode** + Three.js or Canvas |
+
+### Three palette modes (only when applied)
+
+| Mode | When | Palette |
+|---|---|---|
+| **Neon** *(default for YUV.AI web/app/game/dashboard/social)* | Anything that's not a slide deck | Hot pink `#FF1464` + neon cyan `#00E5FF` + white or rich black |
+| **Decks** *(Fly High)* | Presentations, slides, keynotes only | Purple `#5E17EB` + yellow `#FFEC00` + grey `#F1F2F2` |
+| **Warm Editorial** | Hope, Marcus, bigcats.ai, practical.yuv.ai | Pink + yellow + bone |
+
+The pyramid auto-applies **only** when YUV.AI brand context is signaled (`my brand`, `for me`, `YUV.AI`, etc.). Generic requests stay outside the system — Claude / Copilot / Cursor pick whatever fits the project.
 
 ---
 
@@ -61,7 +128,7 @@ Pairs with `yuv-decks` (cinematic presentation builder), `yuv-viral-video` (shor
 
 Builds open-slide presentation decks in Yuval Avidani's signature style: 4-act narrative arc (Boarding → Ascent → Cruise → Descent), Yuval voice (plain-language, no jargon, ≤8–12 word bullets, define every name), the flight-themed `JourneyBar` unifying every slide, reusable `UseCase` / `CaseStudy` / `LessonsGrid` templates, and an automatic orchestration of nano-banana cinematic hero images + Hyperframes video moments + Mermaid technical diagrams.
 
-Inherits all palette/typography/components from `yuv-design-system` — **defaults to Fly High purple**. For talks whose central metaphor IS literal flight, opt into the `cinematic-flight` mode (sky-blue + hot pink) — same arc and JourneyBar, different palette.
+Inherits all palette/typography/components from `yuv-design-system` and locks the **Decks mode** (Fly High purple/yellow/grey — the dedicated palette for slides). For talks whose central metaphor IS literal flight, opt into the `cinematic-flight` mode (sky-blue + hot pink) — same arc and JourneyBar, different palette. Never falls through to Neon (web/app palette).
 
 🔗 **[View yuv-decks →](skills/yuv-decks/SKILL.md)**
 
