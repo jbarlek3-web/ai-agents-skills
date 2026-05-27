@@ -106,6 +106,43 @@ The pyramid auto-applies **only** when YUV.AI brand context is signaled (`my bra
 
 ---
 
+## 🆕 NEW: cinematic-scrub-landing — golden landing page template
+
+Drop in a hero video + logo + product photo. Get back a **premium cinematic landing page** with mouse-driven video scrubbing and a 5-beat narrative arc.
+
+<p align="center">
+  <img src="skills/cinematic-scrub-landing/assets/01-hero-mouse-scrub.png" alt="Mouse-scrub hero" width="640"/>
+</p>
+
+The hero video lives fixed across the whole page — moving the mouse left-right scrubs the timeline so the subject responds to the cursor. Below it, **four fully-opaque sections each carry their own brand identity** (bright primary-accent recipe / cream nostalgia album / dark contemplative pricing / red action finale) and walk the viewer through *longing → joy → nostalgia → contemplation → action*. Works for **any language** (RTL or LTR) and **any subject** — food, tech, animals, fashion, services, SaaS, wildlife, music, books, real estate.
+
+<p align="center">
+  <img src="skills/cinematic-scrub-landing/assets/02-yellow-recipe.png" alt="Bright primary section" width="220"/>
+  <img src="skills/cinematic-scrub-landing/assets/03-cream-album.png" alt="Cream album section" width="220"/>
+  <img src="skills/cinematic-scrub-landing/assets/04-dark-pricing.png" alt="Dark pricing section" width="220"/>
+  <img src="skills/cinematic-scrub-landing/assets/05-red-cta.png" alt="Red CTA finale" width="220"/>
+</p>
+
+**What's baked in (every rule hard-won from a real production build):**
+
+- **All-keyframes ffmpeg re-encode** (`-g 1 -keyint_min 1`) so mouse-scrub is buttery, not stuttery
+- **The z-index trap** documented as hard rule #1 (outer wrapper has NO bg class, or the video disappears)
+- **Per-section opaque identities** — no monotone scrim through every section
+- **Language-aware typography trinity** (Hebrew Rubik+Assistant+Suez One / English Anton+Inter+Caveat / Arabic Cairo+Tajawal+Reem Kufi / Japanese Noto Sans JP / etc.)
+- **RTL/LTR mirroring** — hero panel side, cursor cue side, scroll-to-top position, arrow direction
+- **Six reusable visual primitives** — polaroid, stamp, ribbon, highlight-circle, ghost-text, motif SVGs
+- **Real product photography wins over generated gradients** — the skill always finds prominent placement for `PRODUCT_IMAGE`
+- **Clickable scroll-spy navbar** + scroll-to-top button + favicon set from the logo
+- **12-step verification gate** before reporting done
+
+Reference implementation: <https://github.com/hoodini/bamba> (Israeli RTL site for the snack "במבה" — the original build this skill was distilled from).
+
+🔗 **[View cinematic-scrub-landing →](skills/cinematic-scrub-landing/SKILL.md)**
+
+Pairs with `parallax-landing-page` (scroll-scrub frames, page never moves) and `video-to-landing-page` (Apple-style sticky hero with sections below) — pick `cinematic-scrub-landing` when the hero should respond to the **cursor** and the page below should **tell a story**.
+
+---
+
 ## 🆕 NEW: yuv-design-system — single source of truth for visuals
 
 Yuval Avidani's canonical design system, now public. **Replaces** the prior `yuv-design` skill (which only covered the Warm Editorial pink/yellow/bone family). Encodes:
