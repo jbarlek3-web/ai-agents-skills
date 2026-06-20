@@ -1,6 +1,6 @@
 ---
 name: ui-ux-pro-max
-description: AI-powered UI/UX design intelligence with 67 styles, 161 color palettes, 57 font pairings, 99 UX guidelines, and 25 chart types across 15 tech stacks. Use when building websites, landing pages, dashboards, admin panels, e-commerce, SaaS, portfolios, mobile apps, or any UI components. Triggers on: design, UI, UX, layout, color palette, typography, accessibility, glassmorphism, dark mode, responsive, button, modal, navbar, card, form, chart.
+description: "AI-powered UI/UX design intelligence with 67 styles, 161 color palettes, 57 font pairings, 99 UX guidelines, and 25 chart types across 15 tech stacks. Use when building websites, landing pages, dashboards, admin panels, e-commerce, SaaS, portfolios, mobile apps, or any UI components. Triggers on: design, UI, UX, layout, color palette, typography, accessibility, glassmorphism, dark mode, responsive, button, modal, navbar, card, form, chart."
 license: MIT
 ---
 
